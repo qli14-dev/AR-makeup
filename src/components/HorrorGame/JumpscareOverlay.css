@@ -1,0 +1,440 @@
+.jumpscare-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #000;
+}
+
+.screen-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.vignette-intense {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 20%, black 100%);
+  animation: vignetteIntensify 0.5s ease;
+}
+
+.chromatic-aberration {
+  width: 100%;
+  height: 100%;
+  animation: glitch 0.2s infinite;
+}
+
+/* Cabinet Bang */
+.jumpscare.cabinet-bang {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shake-screen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  animation: shake 0.5s infinite;
+}
+
+.bang-effect {
+  font-size: 120px;
+  color: #ff0000;
+  font-weight: bold;
+  text-shadow: 0 0 50px rgba(255, 0, 0, 1);
+  animation: bangPulse 0.3s;
+}
+
+.bloody-handprint {
+  width: 200px;
+  height: 250px;
+  background: radial-gradient(ellipse, rgba(139, 0, 0, 0.8), transparent);
+  animation: fadeIn 0.5s;
+}
+
+.scream-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.distorted-face {
+  width: 300px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(50, 50, 50, 0.9), transparent);
+  border-radius: 50%;
+  position: relative;
+  animation: faceDistort 2s;
+}
+
+.distorted-face::before,
+.distorted-face::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  background: #000;
+  top: 35%;
+  border-radius: 50%;
+}
+
+.distorted-face::before {
+  left: 25%;
+}
+
+.distorted-face::after {
+  right: 25%;
+}
+
+/* Shadow Figure */
+.jumpscare.shadow-figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lights-flicker {
+  animation: flicker 0.3s infinite;
+}
+
+.shadow-appears {
+  width: 150px;
+  height: 400px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95));
+  border-radius: 50% 50% 0 0;
+  animation: fadeIn 0.5s;
+  margin-right: 60%;
+}
+
+.shadow-closer {
+  width: 200px;
+  height: 500px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1));
+  border-radius: 50% 50% 0 0;
+  animation: moveCloser 1s;
+}
+
+.static-noise {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(0deg, #000 0px, #fff 1px, #000 2px);
+  opacity: 0.1;
+  animation: staticScroll 0.1s infinite;
+}
+
+.shadow-rush {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rushForward 0.5s;
+}
+
+.hollow-eyes {
+  width: 400px;
+  height: 600px;
+  background: #000;
+  position: relative;
+}
+
+.hollow-eyes::before,
+.hollow-eyes::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 80px;
+  background: #fff;
+  top: 40%;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+}
+
+.hollow-eyes::before {
+  left: 25%;
+}
+
+.hollow-eyes::after {
+  right: 25%;
+}
+
+/* Symbol Attack */
+.jumpscare.symbol-attack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.symbols-glow-red {
+  font-size: 80px;
+  color: #ff0000;
+  text-shadow: 0 0 50px rgba(255, 0, 0, 1);
+  animation: glowPulse 1s infinite;
+}
+
+.symbols-float {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.floating-symbol {
+  position: absolute;
+  font-size: 100px;
+  color: #ff0000;
+  text-shadow: 0 0 30px rgba(255, 0, 0, 1);
+  animation: floatSpin 2s infinite;
+  left: 50%;
+  top: 50%;
+}
+
+.floating-symbol:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateX(150px); }
+.floating-symbol:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateX(150px); }
+.floating-symbol:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateX(150px); }
+.floating-symbol:nth-child(4) { transform: translate(-50%, -50%) rotate(216deg) translateX(150px); }
+.floating-symbol:nth-child(5) { transform: translate(-50%, -50%) rotate(288deg) translateX(150px); }
+
+.symbol-rush {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #ff0000, #000);
+  animation: expandRush 0.5s;
+}
+
+.whisper-text {
+  font-size: 48px;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+  position: absolute;
+  animation: fadeInOut 2s;
+}
+
+/* Mirror Reflection */
+.jumpscare.mirror-reflection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reflection-blinks {
+  width: 300px;
+  height: 400px;
+  background: rgba(50, 50, 50, 0.8);
+  border: 3px solid #444;
+  animation: blink 0.5s;
+}
+
+.reflection-lunge {
+  animation: lunge 0.5s;
+}
+
+.crack-sound {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent 45%, #fff 50%, transparent 55%);
+  animation: crackAppear 0.3s;
+}
+
+.distorted-face-mirror {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screaming-reflection {
+  width: 350px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(100, 100, 100, 0.9), rgba(0, 0, 0, 1));
+  border: 5px solid #444;
+  position: relative;
+  animation: screamPulse 0.5s infinite;
+}
+
+.screaming-reflection::after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 80px;
+  background: #000;
+  bottom: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+/* Window Visitor */
+.jumpscare.window-visitor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.window-condensation {
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 10px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  animation: fadeIn 1s;
+}
+
+.shadow-outside {
+  width: 200px;
+  height: 500px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.9));
+  animation: moveCloser 1s;
+}
+
+.window-bang {
+  animation: shake 0.3s infinite;
+}
+
+.face-on-glass {
+  width: 300px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(180, 180, 180, 0.8), rgba(100, 100, 100, 0.9));
+  border-radius: 50%;
+  position: relative;
+  animation: appear 0.2s;
+}
+
+.face-on-glass::before,
+.face-on-glass::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 70px;
+  background: #000;
+  top: 35%;
+  border-radius: 50%;
+}
+
+.face-on-glass::before {
+  left: 20%;
+}
+
+.face-on-glass::after {
+  right: 20%;
+}
+
+.pale-face {
+  width: 250px;
+  height: 300px;
+  background: radial-gradient(circle, #ccc, #888);
+  border-radius: 50%;
+  animation: fadeSlowly 2s;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-10px, 5px); }
+  50% { transform: translate(10px, -5px); }
+  75% { transform: translate(-5px, -10px); }
+}
+
+@keyframes bangPulse {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes faceDistort {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2) rotate(5deg); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes moveCloser {
+  from { transform: scale(0.5) translateY(50px); opacity: 0.5; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes staticScroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(10px); }
+}
+
+@keyframes rushForward {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1.5); opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { text-shadow: 0 0 50px rgba(255, 0, 0, 1); }
+  50% { text-shadow: 0 0 100px rgba(255, 0, 0, 1), 0 0 150px rgba(255, 0, 0, 0.5); }
+}
+
+@keyframes floatSpin {
+  0% { transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(150px) rotate(-360deg); }
+}
+
+@keyframes expandRush {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(3); opacity: 1; }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes lunge {
+  from { transform: scale(1); }
+  to { transform: scale(1.5); }
+}
+
+@keyframes crackAppear {
+  from { opacity: 0; }
+  to { opacity: 0.3; }
+}
+
+@keyframes screamPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes appear {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeSlowly {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
+
+@keyframes vignetteIntensify {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}

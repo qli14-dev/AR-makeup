@@ -1,0 +1,65 @@
+.game-scene {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+}
+
+.close-up-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.close-up-content {
+  background: #1a1a1a;
+  padding: 40px;
+  border-radius: 10px;
+  border: 2px solid #444;
+  max-width: 800px;
+  text-align: center;
+}
+
+.close-up-content h2 {
+  color: #fff;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.close-up-content button {
+  padding: 12px 30px;
+  background: #8b0000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.close-up-content button:hover {
+  background: #b22222;
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
