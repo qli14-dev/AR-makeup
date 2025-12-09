@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tenant - Horror Escape Room</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #d4d4d4;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #1a1410 0%, #0f0a08 100%);
+        }
+
+        /* Intro Screen */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 2s;
+        }
+
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #8b0000;
+            text-shadow: 0 0 20px #8b0000;
+            margin-bottom: 30px;
+            letter-spacing: 10px;
+        }
+
+        #intro-screen p {
+            max-width: 600px;
+            text-align: center;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #888;
+        }
+
+        #start-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: #8b0000;
+            border: 2px solid #ff0000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px #8b0000;
+        }
+
+        #start-button:hover {
+            background: #ff0000;
+            box-shadow: 0 0 40px #ff0000;
+        }
+
+        /* Main Game View */
+        #main-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Room Description */
+        #room-description {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            text-align: center;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        /* Interactive Room */
+        #room-view {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+            height: 70%;
+            background: rgba(20, 15, 10, 0.9);
+            border: 2px solid #3a2f27;
+            position: relative;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Light flickering effect */
+        .flicker {
+            animation: flicker 0.3s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; }
+        }
+
+        /* Interactive Objects */
+        .object {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 10px;
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid transparent;
+            border-radius: 3px;
+        }
+
+        .object:hover {
+            border-color: #8b0000;
+            background: rgba(139, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
+        }
+
+        /* Specific Object Positions */
+        #desk { top: 20%; left: 70%; width: 150px; height: 100px; }
+        #bookshelf { top: 20%; left: 85%; width: 100px; height: 150px; }
+        #mirror { top: 15%; left: 10%; width: 80px; height: 120px; }
+        #wardrobe { top: 20%; left: 5%; width: 100px; height: 150px; }
+        #painting { top: 10%; left: 35%; width: 120px; height: 100px; }
+        #window { top: 5%; left: 50%; width: 150px; height: 80px; }
+        #mattress { top: 60%; left: 30%; width: 200px; height: 120px; }
+        #carpet { top: 60%; left: 55%; width: 180px; height: 100px; }
+        #coffee-table { top: 55%; left: 60%; width: 120px; height: 80px; }
+        #radiator { top: 50%; left: 85%; width: 80px; height: 60px; }
+        #vent { top: 2%; left: 75%; width: 60px; height: 40px; }
+        #door { top: 40%; left: 2%; width: 80px; height: 150px; background: rgba(60, 40, 30, 0.8); }
+
+        /* Inventory */
+        #inventory {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #444;
+            padding: 15px;
+            min-width: 200px;
+            max-width: 400px;
+            border-radius: 5px;
+        }
+
+        #inventory h3 {
+            margin-bottom: 10px;
+            color: #8b0000;
+            font-size: 1.1em;
+        }
+
+        .inventory-item {
+            background: rgba(139, 0, 0, 0.2);
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #555;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .inventory-item:hover {
+            background: rgba(139, 0, 0, 0.4);
+            border-color: #8b0000;
+        }
+
+        /* Log */
+        #log {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #444;
+            padding: 15px;
+            width: 350px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 2px solid #8b0000;
+            padding-left: 10px;
+            animation: slideIn 0.3s;
+        }
+
+        .log-entry.important {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Modal for examining objects */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-content {
+            background: #1a1410;
+            padding: 30px;
+            border: 2px solid #8b0000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 5px;
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.5);
+            position: relative;
+        }
+
+        #modal-content h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        #modal-content p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        #close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #8b0000;
+            border: none;
+            color: #fff;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+        }
+
+        #close-modal:hover {
+            background: #ff0000;
+        }
+
+        .action-button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 20px;
+            background: #2a2a2a;
+            border: 1px solid #555;
+            color: #d4d4d4;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+            border-radius: 3px;
+        }
+
+        .action-button:hover {
+            background: #8b0000;
+            border-color: #8b0000;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+        }
+
+        .action-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Input for codes */
+        .code-input {
+            width: 200px;
+            padding: 10px;
+            background: #000;
+            border: 2px solid #555;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 3px;
+            margin: 10px;
+        }
+
+        /* Jumpscare overlay */
+        #jumpscare {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jumpscare-image {
+            font-size: 10em;
+            animation: scareZoom 0.3s;
+        }
+
+        @keyframes scareZoom {
+            from {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Ending Screen */
+        #ending-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        #ending-screen h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        #ending-screen.good h1 {
+            color: #4a9eff;
+        }
+
+        #ending-screen.bad h1 {
+            color: #8b0000;
+        }
+
+        #ending-screen.secret h1 {
+            color: #9d4edd;
+        }
+
+        #ending-screen p {
+            max-width: 700px;
+            line-height: 2;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        /* UV Light Effect */
+        .uv-active {
+            filter: hue-rotate(270deg) brightness(0.7) contrast(1.5);
+        }
+
+        .uv-message {
+            display: none;
+            color: #bf00ff;
+            text-shadow: 0 0 10px #bf00ff;
+            font-weight: bold;
+        }
+
+        .uv-active .uv-message {
+            display: block;
+        }
+
+        /* Timer */
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border: 2px solid #444;
+            border-radius: 5px;
+            font-size: 1.5em;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        /* Breathing effect for atmosphere */
+        .breathing {
+            animation: breathe 4s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.02);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Scroll styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #8b0000;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Intro Screen -->
+        <div id="intro-screen">
+            <h1>THE TENANT</h1>
+            <p>You are a journalist investigating disappearances in an old apartment building.</p>
+            <p>You followed a lead to Room 7B, where five tenants vanished over 30 years.</p>
+            <p>You broke in to investigate... and someone knocked you unconscious.</p>
+            <p>You wake up. The door is sealed. The windows are painted black.</p>
+            <p>Something in the walls is breathing.</p>
+            <p style="color: #8b0000; margin-top: 30px;">Find the truth. Solve the puzzles. Escape.</p>
+            <button id="start-button">ENTER THE ROOM</button>
+        </div>
+
+        <!-- Main Game View -->
+        <div id="main-view">
+            <div id="timer">30:00</div>
+
+            <div id="room-description">
+                <p>A dim, flickering bulb barely illuminates the old apartment. The air is thick with dust and decay.
+                Peeling wallpaper reveals water-stained walls beneath. You hear... breathing... from somewhere in the walls.</p>
+            </div>
+
+            <div id="room-view" class="breathing flicker">
+                <!-- Interactive Objects -->
+                <div class="object" id="desk" data-object="desk">DESK</div>
+                <div class="object" id="bookshelf" data-object="bookshelf">BOOKSHELF</div>
+                <div class="object" id="mirror" data-object="mirror">MIRROR</div>
+                <div class="object" id="wardrobe" data-object="wardrobe">WARDROBE</div>
+                <div class="object" id="painting" data-object="painting">PAINTING</div>
+                <div class="object" id="window" data-object="window">WINDOW</div>
+                <div class="object" id="mattress" data-object="mattress">MATTRESS</div>
+                <div class="object" id="carpet" data-object="carpet">CARPET</div>
+                <div class="object" id="coffee-table" data-object="coffee-table">COFFEE TABLE</div>
+                <div class="object" id="radiator" data-object="radiator">RADIATOR</div>
+                <div class="object" id="vent" data-object="vent">VENT</div>
+                <div class="object" id="door" data-object="door">DOOR</div>
+            </div>
+
+            <div id="inventory">
+                <h3>INVENTORY</h3>
+                <div id="inventory-items"></div>
+            </div>
+
+            <div id="log">
+                <div class="log-entry">You wake up on the cold floor...</div>
+            </div>
+        </div>
+
+        <!-- Modal for interactions -->
+        <div id="modal">
+            <div id="modal-content">
+                <button id="close-modal">✕</button>
+                <h2 id="modal-title"></h2>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+
+        <!-- Jumpscare overlay -->
+        <div id="jumpscare">
+            <div class="jumpscare-image"></div>
+        </div>
+
+        <!-- Ending Screen -->
+        <div id="ending-screen">
+            <h1 id="ending-title"></h1>
+            <div id="ending-text"></div>
+        </div>
+    </div>
+
+    <script src="horror-escape-game.js"></script>
+</body>
+</html>
