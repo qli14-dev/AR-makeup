@@ -77,17 +77,39 @@ export const ARMakeupCanvas: React.FC<ARMakeupCanvasProps> = ({ onRendererReady 
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    const renderer = new MakeupRenderer(canvas);
-    renderer.setVideoElement(video);
-    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    // Set canvas size to match container
+    const container = canvas.parentElement;
+    if (container) {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
 
-    rendererRef.current = renderer;
+      const renderer = new MakeupRenderer(canvas);
+      renderer.setVideoElement(video);
+      renderer.setSize(width, height);
 
-    if (onRendererReady) {
-      onRendererReady(renderer);
+      rendererRef.current = renderer;
+
+      if (onRendererReady) {
+        onRendererReady(renderer);
+      }
     }
 
+    // Handle window resize
+    const handleResize = () => {
+      if (canvasRef.current && rendererRef.current) {
+        const container = canvasRef.current.parentElement;
+        if (container) {
+          const width = container.clientWidth;
+          const height = container.clientHeight;
+          rendererRef.current.setSize(width, height);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
