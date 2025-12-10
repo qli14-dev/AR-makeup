@@ -1,11 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
 import ARMakeupCanvas from './components/ARMakeupCanvas';
 import ControlPanel from './components/ControlPanel';
+import HorrorGame from './components/HorrorGame';
 import { useMakeup } from './hooks/useMakeup';
 import { MakeupRenderer } from './utils/makeupRenderer';
 import './App.css';
 
+type AppMode = 'makeup' | 'horror';
+
 function App() {
+  const [mode, setMode] = useState<AppMode>('makeup');
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(true);
   const rendererRef = useRef<MakeupRenderer | null>(null);
 
@@ -44,6 +48,23 @@ function App() {
     }
   }, [clear]);
 
+  // 恐怖游戏模式
+  if (mode === 'horror') {
+    return (
+      <div className="app horror-mode">
+        <button
+          className="mode-switch-btn horror-exit"
+          onClick={() => setMode('makeup')}
+          aria-label="Exit Horror Mode"
+        >
+          退出恐怖模式
+        </button>
+        <HorrorGame />
+      </div>
+    );
+  }
+
+  // AR化妆模式
   return (
     <div className="app">
       <header className="app-header">
@@ -51,13 +72,22 @@ function App() {
           <h1 className="app-title">✨ AR Makeup Studio</h1>
           <p className="app-subtitle">Real-time Face Tracking & Interactive Makeup</p>
         </div>
-        <button
-          className="toggle-panel-btn"
-          onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
-          aria-label="Toggle control panel"
-        >
-          {isControlPanelOpen ? '← Hide' : 'Show →'}
-        </button>
+        <div className="header-actions">
+          <button
+            className="mode-switch-btn"
+            onClick={() => setMode('horror')}
+            aria-label="Switch to Horror Mode"
+          >
+            🎃 恐怖模式
+          </button>
+          <button
+            className="toggle-panel-btn"
+            onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
+            aria-label="Toggle control panel"
+          >
+            {isControlPanelOpen ? '← Hide' : 'Show →'}
+          </button>
+        </div>
       </header>
 
       <div className="app-content">

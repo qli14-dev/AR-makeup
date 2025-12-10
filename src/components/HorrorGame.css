@@ -1,0 +1,549 @@
+/**
+ * 恐怖游戏UI样式
+ *
+ * 设计理念：
+ * - 极简黑暗界面
+ * - 血红色重点元素
+ * - 压迫感字体
+ * - 老旧CRT显示器效果
+ */
+
+.horror-game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+}
+
+/* 主画布 */
+.horror-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: crosshair;
+}
+
+/* UI叠加层 */
+.horror-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.horror-ui > * {
+  pointer-events: auto;
+}
+
+/* ===== 状态栏 ===== */
+.status-bar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid rgba(100, 0, 0, 0.6);
+  border-radius: 4px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 0 20px rgba(150, 0, 0, 0.3),
+              inset 0 0 10px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  color: #ddd;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-label {
+  width: 50px;
+  color: #999;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.stat-bar {
+  flex: 1;
+  height: 12px;
+  background: rgba(40, 0, 0, 0.8);
+  border: 1px solid rgba(80, 0, 0, 0.6);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+.hp-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(200, 0, 0, 0.9),
+    rgba(255, 50, 50, 0.8)
+  );
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+.sanity-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 100, 150, 0.9),
+    rgba(0, 150, 200, 0.8)
+  );
+  box-shadow: 0 0 10px rgba(0, 150, 200, 0.5);
+}
+
+.battery-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(200, 180, 0, 0.9),
+    rgba(255, 220, 0, 0.8)
+  );
+  box-shadow: 0 0 10px rgba(255, 220, 0, 0.5);
+}
+
+.stat-value {
+  width: 40px;
+  text-align: right;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* 心跳显示 */
+.heartbeat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.heartbeat-icon {
+  color: #ff0000;
+  font-size: 18px;
+  animation: heartbeat-pulse 1s infinite;
+}
+
+@keyframes heartbeat-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.heartbeat-value {
+  color: #ff6666;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
+/* ===== 叙述文本面板 ===== */
+.narrative-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 360px;
+  max-height: 300px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(60, 60, 60, 0.8);
+  border-radius: 4px;
+  padding: 16px;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8),
+              inset 0 0 20px rgba(0, 0, 0, 0.5);
+
+  /* CRT扫描线效果 */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 3px
+    );
+}
+
+.narrative-content {
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.narrative-text {
+  margin: 0 0 12px 0;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  color: #ccc;
+  text-shadow: 0 0 3px rgba(200, 200, 200, 0.3);
+}
+
+.narrative-text:last-child {
+  margin-bottom: 0;
+  color: #fff;
+  animation: text-fade-in 0.5s ease;
+}
+
+@keyframes text-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 滚动条样式 */
+.narrative-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.narrative-panel::-webkit-scrollbar-track {
+  background: rgba(20, 0, 0, 0.5);
+}
+
+.narrative-panel::-webkit-scrollbar-thumb {
+  background: rgba(100, 0, 0, 0.8);
+  border-radius: 4px;
+}
+
+.narrative-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 0, 0, 0.9);
+}
+
+/* ===== 控制面板 ===== */
+.controls-panel {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(80, 0, 0, 0.6);
+  border-radius: 4px;
+  padding: 16px;
+  box-shadow: 0 0 30px rgba(150, 0, 0, 0.4),
+              inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.control-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  background: rgba(60, 0, 0, 0.8);
+  border: 1px solid rgba(100, 0, 0, 0.6);
+  border-radius: 3px;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-toggle:hover {
+  background: rgba(80, 0, 0, 0.9);
+  color: #fff;
+}
+
+.control-toggle-minimized {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(80, 0, 0, 0.6);
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-toggle-minimized:hover {
+  background: rgba(80, 0, 0, 0.9);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(150, 0, 0, 0.5);
+}
+
+.control-section {
+  margin-top: 20px;
+}
+
+.control-section:first-of-type {
+  margin-top: 30px;
+}
+
+.control-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid rgba(80, 0, 0, 0.4);
+  padding-bottom: 6px;
+}
+
+/* 按钮样式 */
+button {
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(
+    135deg,
+    rgba(150, 0, 0, 0.9),
+    rgba(100, 0, 0, 0.9)
+  );
+  border: 2px solid rgba(200, 0, 0, 0.6);
+  border-radius: 4px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 0 20px rgba(200, 0, 0, 0.4),
+              inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(180, 0, 0, 1),
+    rgba(120, 0, 0, 1)
+  );
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.6),
+              inset 0 0 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 0 15px rgba(200, 0, 0, 0.4),
+              inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* 方向按钮 */
+.direction-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.direction-buttons button {
+  padding: 10px;
+  font-size: 13px;
+  background: rgba(40, 0, 0, 0.8);
+  border: 1px solid rgba(80, 0, 0, 0.6);
+  border-radius: 3px;
+  color: #ccc;
+}
+
+.direction-buttons button:hover {
+  background: rgba(60, 0, 0, 0.9);
+  border-color: rgba(120, 0, 0, 0.8);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(150, 0, 0, 0.4);
+}
+
+.direction-buttons button:active {
+  background: rgba(80, 0, 0, 1);
+}
+
+/* 动作按钮 */
+.control-section button:not(.btn-primary):not(.direction-buttons button) {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  background: rgba(20, 20, 30, 0.8);
+  border: 1px solid rgba(60, 60, 80, 0.6);
+  border-radius: 3px;
+  color: #bbb;
+}
+
+.control-section button:hover {
+  background: rgba(30, 30, 50, 0.9);
+  border-color: rgba(80, 80, 120, 0.8);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(100, 100, 150, 0.3);
+}
+
+/* 物品栏 */
+.inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(60, 60, 60, 0.5);
+  border-radius: 3px;
+}
+
+.empty-inventory {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.inventory-item {
+  padding: 6px 12px;
+  font-size: 11px;
+  background: rgba(80, 60, 0, 0.8);
+  border: 1px solid rgba(120, 100, 0, 0.6);
+  border-radius: 3px;
+  color: #ffcc00;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inventory-item:hover {
+  background: rgba(120, 100, 0, 0.9);
+  border-color: rgba(180, 150, 0, 0.8);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 200, 0, 0.4);
+}
+
+.inventory-item:active {
+  background: rgba(150, 120, 0, 1);
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 1024px) {
+  .narrative-panel {
+    right: 20px;
+    max-height: 200px;
+  }
+
+  .controls-panel {
+    width: 100%;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .status-bar {
+    top: 10px;
+    right: 10px;
+    min-width: 180px;
+    padding: 10px;
+  }
+}
+
+/* ===== 特殊效果 ===== */
+
+/* 低HP闪烁 */
+@keyframes low-hp-flash {
+  0%, 100% {
+    border-color: rgba(200, 0, 0, 0.6);
+  }
+  50% {
+    border-color: rgba(255, 0, 0, 1);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+  }
+}
+
+.status-bar.low-hp {
+  animation: low-hp-flash 1s infinite;
+}
+
+/* 文字打字机效果 */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #ccc;
+  animation: typewriter 2s steps(40) 1s 1 normal both,
+             blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #ccc;
+  }
+}
+
+/* 恐怖脉冲效果 */
+@keyframes horror-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(150, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(200, 0, 0, 0.6);
+  }
+}
+
+.horror-pulse {
+  animation: horror-pulse 2s infinite;
+}
