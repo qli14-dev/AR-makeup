@@ -1,0 +1,257 @@
+/* Game-specific styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Times New Roman', serif;
+  background: #000;
+  color: #888;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+#game-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+#menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.5s;
+}
+
+#menu.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#menu h1 {
+  font-size: 48px;
+  color: #aa8866;
+  text-shadow: 0 0 20px #442211, 0 0 40px #220000;
+  margin-bottom: 20px;
+  letter-spacing: 4px;
+  text-align: center;
+  animation: flicker 3s infinite;
+}
+
+#menu .subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 60px;
+  letter-spacing: 2px;
+  font-style: italic;
+}
+
+#menu .instruction {
+  font-size: 20px;
+  color: #888;
+  margin: 10px 0;
+  padding: 15px 30px;
+  border: 1px solid #444;
+  background: rgba(20, 10, 5, 0.5);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#menu .instruction:hover {
+  color: #aa8866;
+  border-color: #aa8866;
+  box-shadow: 0 0 20px rgba(170, 136, 102, 0.3);
+}
+
+#menu .controls {
+  margin-top: 40px;
+  font-size: 14px;
+  color: #555;
+  max-width: 500px;
+  text-align: left;
+  line-height: 1.8;
+}
+
+#menu .controls div {
+  margin: 5px 0;
+}
+
+#menu .controls span {
+  color: #aa8866;
+  font-weight: bold;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; text-shadow: 0 0 20px #442211, 0 0 40px #220000; }
+  50% { opacity: 0.8; text-shadow: 0 0 15px #331100, 0 0 30px #110000; }
+}
+
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  z-index: 100;
+  pointer-events: none;
+  display: none;
+}
+
+#hud.active {
+  display: block;
+}
+
+#objective {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #444;
+  padding: 15px 20px;
+  color: #aa8866;
+  font-size: 16px;
+  max-width: 400px;
+  text-shadow: 0 0 10px #000;
+}
+
+#interaction-prompt {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #aa8866;
+  padding: 15px 30px;
+  color: #aa8866;
+  font-size: 18px;
+  display: none;
+  z-index: 100;
+  text-shadow: 0 0 10px #000;
+  pointer-events: none;
+}
+
+#crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  z-index: 99;
+  pointer-events: none;
+}
+
+#crosshair::before,
+#crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(170, 136, 102, 0.6);
+}
+
+#crosshair::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+#crosshair::after {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+#inventory {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #444;
+  padding: 15px;
+  color: #888;
+  font-size: 14px;
+  z-index: 100;
+  pointer-events: none;
+  max-width: 200px;
+}
+
+#inventory h3 {
+  color: #aa8866;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+}
+
+#inventory-items {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+#inventory-items div {
+  padding: 5px 0;
+  border-bottom: 1px solid #222;
+}
+
+#jumpscare-overlay {
+  display: none;
+}
+
+#vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 98;
+  background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.8) 100%);
+  opacity: 0.5;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5px, 5px); }
+  20% { transform: translate(5px, -5px); }
+  30% { transform: translate(-5px, -5px); }
+  40% { transform: translate(5px, 5px); }
+  50% { transform: translate(-5px, 5px); }
+  60% { transform: translate(5px, -5px); }
+  70% { transform: translate(-5px, -5px); }
+  80% { transform: translate(5px, 5px); }
+  90% { transform: translate(-5px, 5px); }
+}
+
+#warning {
+  background: rgba(80, 0, 0, 0.9);
+  border: 2px solid #800;
+  padding: 30px;
+  max-width: 600px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #faa;
+}
+
+#warning h2 {
+  color: #f88;
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+#warning p {
+  font-size: 14px;
+  line-height: 1.6;
+}
