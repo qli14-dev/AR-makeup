@@ -10,13 +10,17 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/camera_utils": "^0.3.1640029074",
     "@mediapipe/drawing_utils": "^0.3.1620248257",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "@tensorflow/tfjs-backend-webgl": "^4.17.0",
     "@tensorflow/tfjs-core": "^4.17.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.17.0"
+    "@types/howler": "^2.2.12",
+    "@types/three": "^0.181.0",
+    "howler": "^2.2.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.181.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
