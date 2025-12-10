@@ -4,16 +4,29 @@ A psychological horror escape room experience. You wake up trapped in Room 7B, a
 
 ## 🎮 How to Play
 
-### Two Versions Available:
+### Three Versions Available:
 
-**🎨 VISUAL VERSION (RECOMMENDED):**
+**⛪ GOTHIC CATHEDRAL VERSION (NEW - RECOMMENDED):**
+```bash
+open horror-escape-gothic.html
+```
+- **Underground Gothic cathedral atmosphere**
+- Stone architecture with arches and columns
+- Mixed teal/blue ambient + warm orange candlelight
+- Blue-green fog drifting through space
+- Wet reflective stone floors
+- Floating light particles
+- Sacred but corrupted medieval horror
+- Volumetric lighting effects
+
+**🎨 APARTMENT VERSION:**
 ```bash
 open horror-escape-room-visual.html
 ```
-- Fully rendered 3D room with CSS graphics
-- Realistic furniture, lighting, and atmosphere
-- Flickering light bulb and floating dust particles
-- Immersive first-person view
+- Modern abandoned apartment
+- Realistic furniture with CSS graphics
+- Flickering light bulb
+- First-person room view
 
 **📝 TEXT VERSION:**
 ```bash
@@ -107,9 +120,10 @@ Can you:
 
 ## 📁 Files
 
-- `horror-escape-room-visual.html` - **Visual version with CSS graphics** (RECOMMENDED)
+- `horror-escape-gothic.html` - **Gothic cathedral version** (RECOMMENDED - NEW!)
+- `horror-escape-room-visual.html` - Apartment visual version
 - `horror-escape-room.html` - Text-based version
-- `horror-escape-game.js` - Game logic and mechanics (shared by both versions)
+- `horror-escape-game.js` - Game logic and mechanics (shared by all versions)
 - `GAME_DESIGN.md` - Complete design document with full details
 - `HORROR_ESCAPE_README.md` - This file
 
