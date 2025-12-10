@@ -4,16 +4,30 @@ A psychological horror escape room experience. You wake up trapped in Room 7B, a
 
 ## 🎮 How to Play
 
-1. **Open the game:**
-   ```bash
-   # Simply open in your browser:
-   open horror-escape-room.html
-   ```
+### Two Versions Available:
 
-2. **Click objects** in the room to examine them
-3. **Solve puzzles** using clues hidden throughout the room
-4. **Manage your inventory** - items appear in the bottom-left panel
-5. **Escape before time runs out** - you have 30 minutes
+**🎨 VISUAL VERSION (RECOMMENDED):**
+```bash
+open horror-escape-room-visual.html
+```
+- Fully rendered 3D room with CSS graphics
+- Realistic furniture, lighting, and atmosphere
+- Flickering light bulb and floating dust particles
+- Immersive first-person view
+
+**📝 TEXT VERSION:**
+```bash
+open horror-escape-room.html
+```
+- Clean text-based interface
+- Lighter on system resources
+- Same puzzles and gameplay
+
+### Gameplay:
+1. **Click objects** in the room to examine them
+2. **Solve puzzles** using clues hidden throughout the room
+3. **Manage your inventory** - items appear in the bottom-left panel
+4. **Escape before time runs out** - you have 30 minutes
 
 ## 🎯 Controls
 
@@ -93,8 +107,9 @@ Can you:
 
 ## 📁 Files
 
-- `horror-escape-room.html` - Main game file (open this)
-- `horror-escape-game.js` - Game logic and mechanics
+- `horror-escape-room-visual.html` - **Visual version with CSS graphics** (RECOMMENDED)
+- `horror-escape-room.html` - Text-based version
+- `horror-escape-game.js` - Game logic and mechanics (shared by both versions)
 - `GAME_DESIGN.md` - Complete design document with full details
 - `HORROR_ESCAPE_README.md` - This file
 
