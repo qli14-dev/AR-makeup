@@ -41,71 +41,71 @@ const EscapeRoom: React.FC = () => {
   const [puzzleInput, setPuzzleInput] = useState('');
 
   const [puzzles, setPuzzles] = useState<Puzzle[]>([
-    { id: 'safe', name: '保险箱密码', solved: false, required: true },
-    { id: 'clock', name: '时钟谜题', solved: false, required: true },
-    { id: 'painting', name: '画作之谜', solved: false, required: true },
-    { id: 'door', name: '最终密码门', solved: false, required: true },
+    { id: 'safe', name: 'Safe Password', solved: false, required: true },
+    { id: 'clock', name: 'Clock Puzzle', solved: false, required: true },
+    { id: 'painting', name: 'Painting Mystery', solved: false, required: true },
+    { id: 'door', name: 'Final Password Door', solved: false, required: true },
   ]);
 
   const [objects, setObjects] = useState<GameObject[]>([
     {
       id: 'desk',
-      name: '书桌',
+      name: 'Desk',
       x: 15,
       y: 60,
       width: 20,
       height: 25,
       examined: false,
-      clue: '你发现了一个抽屉，里面有一把钥匙和一张纸条："时间会揭示一切"',
-      givesItem: { id: 'key1', name: '铜钥匙', description: '一把古老的铜钥匙', icon: '🔑' }
+      clue: 'You found a drawer containing a key and a note: "Time will reveal everything"',
+      givesItem: { id: 'key1', name: 'Bronze Key', description: 'An ancient bronze key', icon: '🔑' }
     },
     {
       id: 'safe',
-      name: '保险箱',
+      name: 'Safe',
       x: 70,
       y: 40,
       width: 15,
       height: 20,
       examined: false,
       puzzle: 'safe',
-      clue: '保险箱需要4位数字密码。墙上的时钟似乎有些异常...'
+      clue: 'The safe requires a 4-digit password. The clock on the wall seems unusual...'
     },
     {
       id: 'clock',
-      name: '古老的挂钟',
+      name: 'Old Clock',
       x: 45,
       y: 15,
       width: 10,
       height: 15,
       examined: false,
-      clue: '时钟停在了3:27。奇怪的是，时针和分针的位置似乎被人调换了...',
+      clue: 'The clock stopped at 3:27. Strangely, the hour and minute hands seem to be swapped...',
       puzzle: 'clock'
     },
     {
       id: 'painting',
-      name: '神秘画作',
+      name: 'Mysterious Painting',
       x: 20,
       y: 20,
       width: 15,
       height: 20,
       examined: false,
       requiresItem: 'key1',
-      clue: '画作背后藏着一个机关！你发现了一串数字：7-3-9-1',
-      givesItem: { id: 'code', name: '密码纸条', description: '写着：7391', icon: '📄' }
+      clue: 'A mechanism is hidden behind the painting! You discovered a sequence of numbers: 7-3-9-1',
+      givesItem: { id: 'code', name: 'Code Note', description: 'Written: 7391', icon: '📄' }
     },
     {
       id: 'bookshelf',
-      name: '书架',
+      name: 'Bookshelf',
       x: 5,
       y: 30,
       width: 12,
       height: 40,
       examined: false,
-      clue: '你翻阅了书架上的书籍，发现一本日记本。最后一页写着："门的密码是所有谜题答案之和"'
+      clue: 'You browsed through the books and found a diary. The last page reads: "The door password is the sum of all puzzle answers"'
     },
     {
       id: 'door',
-      name: '出口大门',
+      name: 'Exit Door',
       x: 85,
       y: 55,
       width: 12,
@@ -160,15 +160,15 @@ const EscapeRoom: React.FC = () => {
           o.id === obj.id ? { ...o, examined: true } : o
         );
         setObjects(updatedObjects);
-        setExamineText(obj.clue || `你仔细检查了${obj.name}。`);
+        setExamineText(obj.clue || `You carefully examined the ${obj.name}.`);
 
         if (obj.givesItem && !inventory.find(item => item.id === obj.givesItem!.id)) {
           setInventory([...inventory, obj.givesItem]);
-          showMessage(`获得物品: ${obj.givesItem.name}`);
+          showMessage(`Item obtained: ${obj.givesItem.name}`);
         }
         setSelectedItem(null);
       } else {
-        showMessage('这个物品无法在这里使用');
+        showMessage('This item cannot be used here');
         setSelectedItem(null);
       }
       return;
@@ -177,7 +177,7 @@ const EscapeRoom: React.FC = () => {
     // Normal object interaction
     if (obj.requiresItem && !inventory.find(item => item.id === obj.requiresItem)) {
       const requiredItem = inventory.find(i => i.id === obj.requiresItem);
-      showMessage(`你需要${requiredItem?.name || '某个物品'}才能检查这个物品。尝试选中物品后再点击。`);
+      showMessage(`You need the ${requiredItem?.name || 'an item'} to examine this. Try selecting an item first.`);
       return;
     }
 
@@ -191,11 +191,11 @@ const EscapeRoom: React.FC = () => {
     );
     setObjects(updatedObjects);
 
-    setExamineText(obj.clue || `你仔细检查了${obj.name}，但没有发现特别之处。`);
+    setExamineText(obj.clue || `You carefully examined the ${obj.name}, but found nothing special.`);
 
     if (obj.givesItem && !inventory.find(item => item.id === obj.givesItem!.id)) {
       setInventory([...inventory, obj.givesItem]);
-      showMessage(`获得物品: ${obj.givesItem.name}`);
+      showMessage(`Item obtained: ${obj.givesItem.name}`);
     }
   };
 
@@ -210,7 +210,7 @@ const EscapeRoom: React.FC = () => {
       setPuzzles(puzzles.map(p =>
         p.id === puzzleId ? { ...p, solved: true } : p
       ));
-      showMessage('✓ 谜题解开了！');
+      showMessage('✓ Puzzle solved!');
       setShowPuzzle(null);
       setPuzzleInput('');
 
@@ -218,21 +218,21 @@ const EscapeRoom: React.FC = () => {
       if (puzzleId === 'safe') {
         const flashlight: Item = {
           id: 'flashlight',
-          name: '手电筒',
-          description: '可以照亮黑暗的角落',
+          name: 'Flashlight',
+          description: 'Can illuminate dark corners',
           icon: '🔦'
         };
         setInventory([...inventory, flashlight]);
       }
     } else {
-      showMessage('✗ 密码错误！');
+      showMessage('✗ Wrong password!');
       setPuzzleInput('');
     }
   };
 
   const useHint = () => {
     if (hints <= 0) {
-      showMessage('没有提示次数了！');
+      showMessage('No hints left!');
       return;
     }
 
@@ -240,14 +240,14 @@ const EscapeRoom: React.FC = () => {
     const unsolvedPuzzle = puzzles.find(p => !p.solved);
 
     const hintMessages: { [key: string]: string } = {
-      'safe': '提示：仔细检查画作背后...',
-      'clock': '提示：时钟显示的时间就是答案',
-      'painting': '提示：用铜钥匙可能有用',
-      'door': '提示：书架上的日记给出了线索'
+      'safe': 'Hint: Check behind the painting...',
+      'clock': 'Hint: The time shown on the clock is the answer',
+      'painting': 'Hint: The bronze key might be useful',
+      'door': 'Hint: The diary on the bookshelf gives a clue'
     };
 
     if (unsolvedPuzzle) {
-      showMessage(hintMessages[unsolvedPuzzle.id] || '仔细观察房间里的每一个细节');
+      showMessage(hintMessages[unsolvedPuzzle.id] || 'Carefully observe every detail in the room');
     }
   };
 
@@ -265,18 +265,18 @@ const EscapeRoom: React.FC = () => {
 
     const puzzleContent: { [key: string]: { title: string; description: string; placeholder: string } } = {
       'safe': {
-        title: '保险箱',
-        description: '请输入4位数字密码',
+        title: 'Safe',
+        description: 'Enter 4-digit password',
         placeholder: '____'
       },
       'clock': {
-        title: '时钟谜题',
-        description: '时钟隐藏着什么秘密？输入你发现的数字',
+        title: 'Clock Puzzle',
+        description: 'What secret does the clock hide? Enter the number you found',
         placeholder: '___'
       },
       'door': {
-        title: '出口大门',
-        description: '最终的密码门。输入所有答案之和',
+        title: 'Exit Door',
+        description: 'The final password door. Enter the sum of all answers',
         placeholder: '____'
       }
     };
@@ -298,13 +298,13 @@ const EscapeRoom: React.FC = () => {
           />
           <div className="puzzle-buttons">
             <button onClick={() => handlePuzzleSubmit(showPuzzle, puzzleInput)}>
-              确认
+              Confirm
             </button>
             <button onClick={() => {
               setShowPuzzle(null);
               setPuzzleInput('');
             }}>
-              取消
+              Cancel
             </button>
           </div>
         </div>
@@ -316,17 +316,17 @@ const EscapeRoom: React.FC = () => {
     return (
       <div className="escape-room intro">
         <div className="intro-content">
-          <h1 className="glitch" data-text="密室逃脱">密室逃脱</h1>
+          <h1 className="glitch" data-text="ESCAPE ROOM">ESCAPE ROOM</h1>
           <p className="intro-text">
-            你醒来发现自己被困在一个陌生的房间里...<br />
-            房间里充满了谜题和线索<br />
-            你只有60分钟的时间逃出去<br />
+            You wake up to find yourself trapped in a strange room...<br />
+            The room is filled with puzzles and clues<br />
+            You only have 60 minutes to escape<br />
             <br />
-            时间在流逝...<br />
-            你能逃出去吗？
+            Time is ticking...<br />
+            Can you escape?
           </p>
           <button className="start-button" onClick={startGame}>
-            开始游戏
+            START GAME
           </button>
         </div>
       </div>
@@ -337,10 +337,10 @@ const EscapeRoom: React.FC = () => {
     return (
       <div className="escape-room game-over won">
         <div className="game-over-content">
-          <h1>🎉 恭喜逃脱！</h1>
-          <p>你成功逃出了密室！</p>
-          <p>用时: {formatTime(3600 - timeLeft)}</p>
-          <button onClick={startGame}>再玩一次</button>
+          <h1>🎉 Congratulations!</h1>
+          <p>You successfully escaped the room!</p>
+          <p>Time: {formatTime(3600 - timeLeft)}</p>
+          <button onClick={startGame}>Play Again</button>
         </div>
       </div>
     );
@@ -350,9 +350,9 @@ const EscapeRoom: React.FC = () => {
     return (
       <div className="escape-room game-over lost">
         <div className="game-over-content">
-          <h1>⏰ 时间到！</h1>
-          <p>你未能在规定时间内逃出...</p>
-          <button onClick={startGame}>重新开始</button>
+          <h1>⏰ Time's Up!</h1>
+          <p>You failed to escape in time...</p>
+          <button onClick={startGame}>Retry</button>
         </div>
       </div>
     );
@@ -366,11 +366,11 @@ const EscapeRoom: React.FC = () => {
           ⏱️ {formatTime(timeLeft)}
         </div>
         <div className="hints">
-          💡 提示: {hints}
-          <button onClick={useHint} disabled={hints === 0}>使用提示</button>
+          💡 Hints: {hints}
+          <button onClick={useHint} disabled={hints === 0}>Use Hint</button>
         </div>
         <div className="progress">
-          进度: {puzzles.filter(p => p.solved).length}/{puzzles.length}
+          Progress: {puzzles.filter(p => p.solved).length}/{puzzles.length}
         </div>
       </div>
 
@@ -430,14 +430,14 @@ const EscapeRoom: React.FC = () => {
         {examineText && (
           <div className="examine-panel">
             <p>{examineText}</p>
-            <button onClick={() => setExamineText('')}>关闭</button>
+            <button onClick={() => setExamineText('')}>Close</button>
           </div>
         )}
       </div>
 
       {/* Inventory */}
       <div className="inventory">
-        <h3>物品栏</h3>
+        <h3>Inventory</h3>
         <div className="inventory-items">
           {inventory.map(item => (
             <div
@@ -451,11 +451,11 @@ const EscapeRoom: React.FC = () => {
             </div>
           ))}
           {inventory.length === 0 && (
-            <p className="empty-inventory">空</p>
+            <p className="empty-inventory">Empty</p>
           )}
         </div>
         {selectedItem && (
-          <p className="use-hint">点击物品使用它</p>
+          <p className="use-hint">Click an object to use this item</p>
         )}
       </div>
 

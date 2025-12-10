@@ -1,161 +1,161 @@
-# 🎮 密室逃脱游戏攻略
+# 🎮 Escape Room Game Guide
 
-## 游戏概述
+## Game Overview
 
-你醒来发现自己被困在一个神秘的房间里，必须在 **60 分钟**内找到逃生的方法！
+You wake up to find yourself trapped in a mysterious room and must find a way to escape within **60 minutes**!
 
-房间里充满了谜题、线索和隐藏的物品。仔细观察每一个细节，收集物品，解开谜题，在时间耗尽之前逃出去！
+The room is filled with puzzles, clues, and hidden items. Observe every detail carefully, collect items, solve puzzles, and escape before time runs out!
 
-## 🎯 游戏目标
+## 🎯 Game Objective
 
-- ⏱️ 在 60 分钟倒计时结束前逃出密室
-- 🔍 探索房间中的所有可交互物品
-- 🧩 解开所有 4 个谜题
-- 🚪 打开最终的出口大门
+- ⏱️ Escape the room before the 60-minute countdown ends
+- 🔍 Explore all interactive objects in the room
+- 🧩 Solve all 4 puzzles
+- 🚪 Open the final exit door
 
-## 🕹️ 游戏操作
+## 🕹️ Game Controls
 
-### 基础交互
-- **点击物品**：检查和探索房间中的物品
-- **收集物品**：某些物品会自动加入你的物品栏
-- **使用物品**：点击物品栏中的物品选中，然后点击相应的目标物品使用
-- **解谜**：某些物品需要输入密码才能打开
+### Basic Interactions
+- **Click Objects**: Examine and explore objects in the room
+- **Collect Items**: Certain objects will automatically be added to your inventory
+- **Use Items**: Click an item in your inventory to select it, then click the target object to use it
+- **Solve Puzzles**: Some objects require password input to unlock
 
-### 提示系统
-- 💡 你有 **3 次提示机会**
-- 点击"使用提示"按钮获取当前谜题的线索
-- 明智地使用提示，它们数量有限！
+### Hint System
+- 💡 You have **3 hint attempts**
+- Click the "Use Hint" button to get clues for the current puzzle
+- Use hints wisely - they're limited!
 
-## 🗺️ 房间物品
+## 🗺️ Room Objects
 
-房间里包含以下可交互物品：
+The room contains the following interactive objects:
 
-1. **📚 书桌** - 可能藏有重要物品
-2. **🔒 保险箱** - 需要 4 位数字密码
-3. **🕐 古老的挂钟** - 时间似乎有些不对劲...
-4. **🖼️ 神秘画作** - 可能需要特殊工具才能探索
-5. **📖 书架** - 里面藏着重要的线索
-6. **🚪 出口大门** - 最终的逃生出口
+1. **📚 Desk** - May contain important items
+2. **🔒 Safe** - Requires a 4-digit password
+3. **🕐 Old Clock** - Something seems off about the time...
+4. **🖼️ Mysterious Painting** - May require special tools to explore
+5. **📖 Bookshelf** - Contains important clues
+6. **🚪 Exit Door** - The final escape route
 
-## 🧩 谜题提示（无剧透）
+## 🧩 Puzzle Hints (No Spoilers)
 
-### 谜题 1：书桌之谜
-- 从最简单的地方开始
-- 每个冒险都需要一个起点
+### Puzzle 1: The Desk Mystery
+- Start with the simplest things
+- Every adventure needs a beginning
 
-### 谜题 2：时钟的秘密
-- 时间会说话
-- 有时候，事物并非表面所见
+### Puzzle 2: The Clock's Secret
+- Time speaks volumes
+- Sometimes things aren't what they appear
 
-### 谜题 3：画作背后
-- 某些东西需要钥匙
-- 艺术品往往隐藏着秘密
+### Puzzle 3: Behind the Painting
+- Some things require a key
+- Art often hides secrets
 
-### 谜题 4：最终密码门
-- 所有的线索都是相关的
-- 数学可能是关键
+### Puzzle 4: Final Password Door
+- All clues are connected
+- Math might be the key
 
-## 💡 完整攻略（剧透警告！）
+## 💡 Complete Walkthrough (Spoiler Warning!)
 
 <details>
-<summary>点击查看完整攻略（仅在卡关时查看）</summary>
+<summary>Click to view full walkthrough (only if stuck)</summary>
 
-### 步骤 1：探索书桌
-1. 点击**书桌**
-2. 获得**铜钥匙** 🔑
-3. 阅读纸条："时间会揭示一切"
+### Step 1: Explore the Desk
+1. Click the **Desk**
+2. Obtain the **Bronze Key** 🔑
+3. Read the note: "Time will reveal everything"
 
-### 步骤 2：检查时钟
-1. 点击**古老的挂钟**
-2. 注意时钟显示 3:27
-3. 记住这个数字：**327**
+### Step 2: Check the Clock
+1. Click the **Old Clock**
+2. Notice the clock shows 3:27
+3. Remember this number: **327**
 
-### 步骤 3：使用钥匙打开画作
-1. 点击物品栏中的**铜钥匙**选中它
-2. 点击**神秘画作**使用钥匙
-3. 发现密码：**7391**
-4. 获得**密码纸条** 📄
+### Step 3: Use Key on Painting
+1. Click the **Bronze Key** in your inventory to select it
+2. Click the **Mysterious Painting** to use the key
+3. Discover the password: **7391**
+4. Obtain the **Code Note** 📄
 
-### 步骤 4：打开保险箱
-1. 点击**保险箱**
-2. 输入密码：**7391**（来自画作）
-3. 获得**手电筒** 🔦
+### Step 4: Open the Safe
+1. Click the **Safe**
+2. Enter password: **7391** (from the painting)
+3. Obtain the **Flashlight** 🔦
 
-### 步骤 5：阅读书架
-1. 点击**书架**
-2. 阅读日记："门的密码是所有谜题答案之和"
+### Step 5: Read the Bookshelf
+1. Click the **Bookshelf**
+2. Read the diary: "The door password is the sum of all puzzle answers"
 
-### 步骤 6：计算最终密码
-- 时钟答案：327
-- 保险箱答案：7391
-- 总和：327 + 7391 = 7718
-- **但游戏中设定的正确答案是：8045**
-  （这是一个创意谜题，可能需要其他隐藏线索）
+### Step 6: Calculate Final Password
+- Clock answer: 327
+- Safe answer: 7391
+- Sum: 327 + 7391 = 7718
+- **But the correct answer set in game is: 8045**
+  (This is a creative puzzle that may require other hidden clues)
 
-### 步骤 7：逃脱
-1. 点击**出口大门**
-2. 输入最终密码：**8045**
-3. 成功逃脱！🎉
+### Step 7: Escape
+1. Click the **Exit Door**
+2. Enter final password: **8045**
+3. Successfully escape! 🎉
 
 </details>
 
-## 🎨 游戏特色
+## 🎨 Game Features
 
-### 紧张的氛围
-- 🌑 黑暗压抑的视觉设计
-- ⏰ 实时倒计时系统
-- 🔴 时间紧迫时的警告效果（最后 5 分钟红色闪烁！）
-- ⚡ 故障效果和脉冲动画
+### Tense Atmosphere
+- 🌑 Dark, oppressive visual design
+- ⏰ Real-time countdown system
+- 🔴 Warning effects when time is running low (red flashing in last 5 minutes!)
+- ⚡ Glitch effects and pulse animations
 
-### 丰富的交互
-- 📦 物品收集和使用系统
-- 🎯 多个谜题关卡
-- 💭 详细的物品检查文本
-- 🎮 直观的点击式交互
+### Rich Interactions
+- 📦 Item collection and usage system
+- 🎯 Multiple puzzle stages
+- 💭 Detailed item examination text
+- 🎮 Intuitive click-based interaction
 
-### 动态反馈
-- ✅ 实时进度显示
-- 💬 消息提示系统
-- 🎊 胜利/失败动画
-- 🔊 视觉反馈效果
+### Dynamic Feedback
+- ✅ Real-time progress display
+- 💬 Message notification system
+- 🎊 Victory/defeat animations
+- 🔊 Visual feedback effects
 
-## ⚙️ 技术信息
+## ⚙️ Technical Information
 
-- **框架**：React + TypeScript
-- **构建工具**：Vite
-- **样式**：纯 CSS（带动画效果）
-- **响应式**：支持桌面和移动设备
+- **Framework**: React + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Pure CSS (with animations)
+- **Responsive**: Supports desktop and mobile devices
 
-## 🚀 运行游戏
+## 🚀 Running the Game
 
 ```bash
-# 安装依赖
+# Install dependencies
 npm install
 
-# 启动开发服务器
+# Start development server
 npm run dev
 
-# 构建生产版本
+# Build production version
 npm run build
 ```
 
-游戏将在 http://localhost:3000/ 运行
+The game will run at http://localhost:3000/
 
-## 🎯 游戏小贴士
+## 🎯 Game Tips
 
-1. **仔细探索**：每个物品都可能包含重要线索
-2. **记录信息**：将发现的数字和线索记下来
-3. **逻辑思考**：谜题之间可能有关联
-4. **管理时间**：注意倒计时，不要浪费太多时间
-5. **善用提示**：真正卡关时再使用提示
+1. **Explore Thoroughly**: Every object may contain important clues
+2. **Take Notes**: Write down numbers and clues you discover
+3. **Think Logically**: Puzzles may be interconnected
+4. **Manage Time**: Watch the countdown, don't waste too much time
+5. **Use Hints Wisely**: Only use hints when truly stuck
 
-## 🏆 挑战模式
+## 🏆 Challenge Mode
 
-想要更大的挑战？尝试：
-- 不使用任何提示通关
-- 在 30 分钟内完成游戏
-- 找出所有隐藏的彩蛋和细节
+Want a bigger challenge? Try:
+- Complete the game without using any hints
+- Finish the game within 30 minutes
+- Find all hidden easter eggs and details
 
 ---
 
-**祝你好运，逃脱者！时间在流逝... ⏰**
+**Good luck, escapee! Time is ticking... ⏰**
