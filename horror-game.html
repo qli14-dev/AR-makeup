@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>破碎者 - 恐怖密室逃脱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #ccc;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* 状态栏 */
+        #status-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(100, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 16px;
+            min-width: 220px;
+            box-shadow: 0 0 20px rgba(150, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            width: 50px;
+            color: #999;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .stat-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(40, 0, 0, 0.8);
+            border: 1px solid rgba(80, 0, 0, 0.6);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .hp-fill {
+            background: linear-gradient(90deg, rgba(200, 0, 0, 0.9), rgba(255, 50, 50, 0.8));
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        }
+
+        .sanity-fill {
+            background: linear-gradient(90deg, rgba(0, 100, 150, 0.9), rgba(0, 150, 200, 0.8));
+        }
+
+        .stat-value {
+            width: 40px;
+            text-align: right;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .heartbeat-icon {
+            color: #ff0000;
+            font-size: 18px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+        }
+
+        /* 叙述文本 */
+        #narrative {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 360px;
+            max-height: 300px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(60, 60, 60, 0.8);
+            border-radius: 4px;
+            padding: 16px;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        #narrative::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #narrative::-webkit-scrollbar-thumb {
+            background: rgba(100, 0, 0, 0.8);
+            border-radius: 4px;
+        }
+
+        /* 控制面板 */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(80, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 16px;
+            box-shadow: 0 0 30px rgba(150, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+        .control-section {
+            margin-top: 20px;
+        }
+
+        .control-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #999;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(80, 0, 0, 0.4);
+            padding-bottom: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            background: rgba(40, 0, 0, 0.8);
+            border: 1px solid rgba(80, 0, 0, 0.6);
+            border-radius: 3px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: rgba(60, 0, 0, 0.9);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(150, 0, 0, 0.4);
+        }
+
+        #start-btn {
+            background: linear-gradient(135deg, rgba(150, 0, 0, 0.9), rgba(100, 0, 0, 0.9));
+            border: 2px solid rgba(200, 0, 0, 0.6);
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(200, 0, 0, 0.4);
+        }
+
+        #start-btn:hover {
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+        }
+
+        .direction-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #intro-screen h1 {
+            font-size: 48px;
+            color: #ff0000;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            margin-bottom: 20px;
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        #intro-screen p {
+            font-size: 16px;
+            color: #999;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #inventory {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 40px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(60, 60, 60, 0.5);
+            border-radius: 3px;
+        }
+
+        .inventory-item {
+            padding: 6px 12px;
+            font-size: 11px;
+            background: rgba(80, 60, 0, 0.8);
+            border: 1px solid rgba(120, 100, 0, 0.6);
+            border-radius: 3px;
+            color: #ffcc00;
+            cursor: pointer;
+        }
+
+        .inventory-item:hover {
+            background: rgba(120, 100, 0, 0.9);
+            box-shadow: 0 0 10px rgba(255, 200, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 介绍界面 -->
+        <div id="intro-screen">
+            <h1>破碎者</h1>
+            <p>
+                ⚠️ 警告：本游戏包含强烈恐怖元素 ⚠️<br><br>
+                极度压迫 · 黑暗写实 · 密室逃脱<br>
+                参考：《Outlast》《P.T.》《恶灵附身》<br><br>
+                佩戴耳机以获得最佳体验<br>
+                随时可以关闭页面退出
+            </p>
+            <button id="start-btn" onclick="startGame()">开始游戏</button>
+        </div>
+
+        <!-- 游戏画布 -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 状态栏 -->
+        <div id="status-bar" class="hidden">
+            <div class="stat">
+                <span class="stat-label">HP</span>
+                <div class="stat-bar">
+                    <div class="stat-fill hp-fill" id="hp-bar" style="width: 100%"></div>
+                </div>
+                <span class="stat-value" id="hp-value">100</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">心率</span>
+                <div class="heartbeat">
+                    <span class="heartbeat-icon">♥</span>
+                    <span id="heartrate-value">75 BPM</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-label">理智</span>
+                <div class="stat-bar">
+                    <div class="stat-fill sanity-fill" id="sanity-bar" style="width: 100%"></div>
+                </div>
+                <span class="stat-value" id="sanity-value">100</span>
+            </div>
+        </div>
+
+        <!-- 叙述文本 -->
+        <div id="narrative" class="hidden"></div>
+
+        <!-- 控制面板 -->
+        <div id="controls" class="hidden">
+            <div class="control-section">
+                <h3>移动</h3>
+                <div class="direction-btns">
+                    <button onclick="move('north')">↑ 北</button>
+                    <button onclick="move('south')">↓ 南</button>
+                    <button onclick="move('east')">→ 东</button>
+                    <button onclick="move('west')">← 西</button>
+                </div>
+            </div>
+            <div class="control-section">
+                <h3>动作</h3>
+                <button onclick="solvePuzzle()">解谜</button>
+                <button onclick="pickItem('flashlight')">拾取手电筒</button>
+                <button onclick="useItem('盐')">使用盐</button>
+            </div>
+            <div class="control-section">
+                <h3>物品栏</h3>
+                <div id="inventory"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentRoom: 'initial_room',
+            hp: 100,
+            heartRate: 75,
+            sanity: 100,
+            inventory: [],
+            solvedPuzzles: [],
+            entityRoom: 'corridor',
+            gameTime: 0,
+            isPlaying: false
+        };
+
+        // 房间定义
+        const rooms = {
+            initial_room: {
+                name: '觉醒室',
+                description: `你躺在冰冷的混凝土地面上，慢慢恢复意识。
+
+【墙面】潮湿的混凝土墙，长满暗绿色和黑色的霉斑。
+【地面】生锈的铁板拼接，有暗红色的锈迹和碎玻璃。
+【天花板】低矮的水泥天花板，一盏老旧的白炽灯摇晃着。
+【气味】潮湿的霉味混合着铁锈的腥味。
+
+角落里有一个老旧的手电筒。
+地上有一张沾满暗红色污渍的纸条。
+门上有一个四位数密码锁。`,
+                exits: { north: 'corridor' },
+                puzzle: { id: 'door_code', answer: '2847', clue: '血迹笔记上写着：28号房间...第47次实验...' },
+                items: ['flashlight']
+            },
+            corridor: {
+                name: '无尽回廊',
+                description: `狭窄的走廊，长约15米，宽度仅1.2米。
+
+【墙面】剥落的墙纸，霉菌和腐烂的墙板。
+【地面】破碎的木质地板，每走一步都发出吱呀声。
+【照明】昏黄的壁灯，每隔几秒闪烁一次。
+
+走廊尽头有一扇虚掩的门，里面一片漆黑。
+
+...你感觉到一种强烈的被注视感...`,
+                exits: { south: 'initial_room', north: 'second_room' },
+                entityChance: 0.7
+            },
+            second_room: {
+                name: '标本室',
+                description: `你进入一个约4x4米的房间。这里曾经是某种实验室。
+
+【陈列柜】玻璃破碎的陈列柜，福尔马林的刺鼻气味。
+【手术台】生锈的金属手术台，表面布满暗褐色污渍。
+【墙面】白色瓷砖墙，有大量抓痕排列成奇怪的图案。
+
+手术台上散落着生锈的手术器械。
+破碎的柜子里还有一小袋盐。
+墙上的抓痕形成了一个图案密码...`,
+                exits: { south: 'corridor', east: 'final_room' },
+                puzzle: { id: 'pattern_lock', answer: 'circle', clue: '墙面抓痕显示：○（圆形）→ △（三角）→ □（方形）' },
+                items: ['盐']
+            },
+            final_room: {
+                name: '抉择室',
+                description: `你进入最后的房间。这是紧急避难室。
+
+房间中央有三个控制面板：
+【绿色按钮】紧急逃生 - 立即逃脱
+【黄色按钮】部分封锁 - 困住实体
+【红色按钮】完全销毁 - 60秒逃离
+
+身后的门传来猛烈的撞击声——砰！砰！砰！
+它在试图破门而入！
+
+你必须选择！`,
+                exits: { west: 'second_room' },
+                isFinal: true
+            }
+        };
+
+        // Canvas设置
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // 开始游戏
+        function startGame() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('status-bar').classList.remove('hidden');
+            document.getElementById('narrative').classList.remove('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+
+            gameState.isPlaying = true;
+            addNarrative('你慢慢恢复意识...头很痛...身体很冷...');
+            setTimeout(() => {
+                addNarrative(rooms[gameState.currentRoom].description);
+            }, 2000);
+
+            // 启动游戏循环
+            setInterval(update, 1000 / 60);
+            setInterval(updateHeartRate, 1000);
+        }
+
+        // 添加叙述文本
+        function addNarrative(text) {
+            const narrative = document.getElementById('narrative');
+            const p = document.createElement('pre');
+            p.style.cssText = 'margin: 0 0 12px 0; white-space: pre-wrap; color: #ccc;';
+            p.textContent = text;
+            narrative.appendChild(p);
+            narrative.scrollTop = narrative.scrollHeight;
+
+            // 保留最近50条消息
+            while (narrative.children.length > 50) {
+                narrative.removeChild(narrative.firstChild);
+            }
+        }
+
+        // 更新游戏状态
+        function update() {
+            if (!gameState.isPlaying) return;
+
+            // 渲染恐怖氛围
+            renderHorrorAtmosphere();
+
+            // 实体AI
+            if (Math.random() < 0.001) {  // 低概率触发实体事件
+                const room = rooms[gameState.currentRoom];
+                if (room.entityChance && Math.random() < room.entityChance) {
+                    triggerEntityEvent();
+                }
+            }
+        }
+
+        // 渲染恐怖氛围
+        function renderHorrorAtmosphere() {
+            // 全局黑暗
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 雾气
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.7
+            );
+            gradient.addColorStop(0, 'rgba(60, 60, 65, 0.1)');
+            gradient.addColorStop(1, 'rgba(40, 40, 45, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 晕影
+            const vignette = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.3,
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.7
+            );
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 手电筒效果（如果有）
+            if (gameState.inventory.includes('flashlight')) {
+                const flashlight = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 150);
+                flashlight.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+                flashlight.addColorStop(0.5, 'rgba(255, 255, 180, 0.3)');
+                flashlight.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.globalCompositeOperation = 'lighten';
+                ctx.fillStyle = flashlight;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalCompositeOperation = 'source-over';
+            }
+
+            // 实体眼睛
+            if (gameState.entityRoom === gameState.currentRoom && Math.random() < 0.3) {
+                renderEntityEyes();
+            }
+        }
+
+        // 渲染实体眼睛
+        function renderEntityEyes() {
+            const x = canvas.width / 2 + (Math.random() - 0.5) * 200;
+            const y = canvas.height / 3;
+
+            // 左眼
+            const eyeGradient = ctx.createRadialGradient(x - 40, y, 0, x - 40, y, 30);
+            eyeGradient.addColorStop(0, 'rgba(255, 0, 0, 0.8)');
+            eyeGradient.addColorStop(1, 'rgba(100, 0, 0, 0)');
+            ctx.fillStyle = eyeGradient;
+            ctx.beginPath();
+            ctx.arc(x - 40, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 右眼
+            ctx.beginPath();
+            ctx.arc(x + 40, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 更新心率
+        function updateHeartRate() {
+            if (!gameState.isPlaying) return;
+
+            // 基础恢复
+            if (gameState.heartRate > 75) {
+                gameState.heartRate = Math.max(75, gameState.heartRate - 2);
+            }
+
+            // 实体接近增加心率
+            if (gameState.entityRoom === gameState.currentRoom) {
+                gameState.heartRate = Math.min(180, gameState.heartRate + 3);
+            }
+
+            updateUI();
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('hp-value').textContent = Math.floor(gameState.hp);
+            document.getElementById('hp-bar').style.width = gameState.hp + '%';
+            document.getElementById('heartrate-value').textContent = Math.floor(gameState.heartRate) + ' BPM';
+            document.getElementById('sanity-value').textContent = Math.floor(gameState.sanity);
+            document.getElementById('sanity-bar').style.width = gameState.sanity + '%';
+
+            // 更新物品栏
+            const inventory = document.getElementById('inventory');
+            inventory.innerHTML = '';
+            if (gameState.inventory.length === 0) {
+                inventory.innerHTML = '<span style="color: #666; font-size: 12px;">无物品</span>';
+            } else {
+                gameState.inventory.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'inventory-item';
+                    btn.textContent = item;
+                    btn.onclick = () => useItem(item);
+                    inventory.appendChild(btn);
+                });
+            }
+        }
+
+        // 移动
+        function move(direction) {
+            const room = rooms[gameState.currentRoom];
+            const targetRoom = room.exits[direction];
+
+            if (!targetRoom) {
+                addNarrative(`${direction}方向没有出口。`);
+                playSound('error');
+                return;
+            }
+
+            // 检查门是否解锁
+            if (room.puzzle && !gameState.solvedPuzzles.includes(room.puzzle.id)) {
+                addNarrative('门被锁住了。需要解决谜题才能通过。');
+                playSound('locked');
+                return;
+            }
+
+            gameState.currentRoom = targetRoom;
+            addNarrative(`\n=== 进入：${rooms[targetRoom].name} ===\n`);
+            addNarrative(rooms[targetRoom].description);
+
+            // 制造噪音
+            gameState.heartRate = Math.min(180, gameState.heartRate + 10);
+
+            // 实体反应
+            if (Math.random() < 0.3) {
+                gameState.entityRoom = targetRoom;
+            }
+
+            // 检查是否是最终房间
+            if (rooms[targetRoom].isFinal) {
+                setTimeout(showFinalChoice, 3000);
+            }
+
+            playSound('door');
+        }
+
+        // 解谜
+        function solvePuzzle() {
+            const room = rooms[gameState.currentRoom];
+            if (!room.puzzle) {
+                addNarrative('这个房间没有谜题。');
+                return;
+            }
+
+            if (gameState.solvedPuzzles.includes(room.puzzle.id)) {
+                addNarrative('这个谜题已经解决了。');
+                return;
+            }
+
+            addNarrative(`\n【谜题】\n线索：${room.puzzle.clue}\n`);
+
+            const answer = prompt('请输入答案：');
+            if (answer === room.puzzle.answer) {
+                gameState.solvedPuzzles.push(room.puzzle.id);
+                addNarrative('✓ 谜题解决！门锁打开了。');
+                playSound('success');
+            } else {
+                addNarrative('✗ 答案错误...');
+                triggerJumpscare('light');
+                playSound('fail');
+            }
+        }
+
+        // 拾取物品
+        function pickItem(item) {
+            const room = rooms[gameState.currentRoom];
+            if (!room.items || !room.items.includes(item)) {
+                addNarrative('这里没有这个物品。');
+                return;
+            }
+
+            gameState.inventory.push(item);
+            room.items = room.items.filter(i => i !== item);
+            addNarrative(`获得物品：${item}`);
+            updateUI();
+            playSound('pickup');
+        }
+
+        // 使用物品
+        function useItem(item) {
+            if (!gameState.inventory.includes(item)) {
+                addNarrative('你没有这个物品。');
+                return;
+            }
+
+            if (item === '盐') {
+                addNarrative('你撒出盐...实体发出刺耳的尖叫，退却了！');
+                gameState.inventory = gameState.inventory.filter(i => i !== item);
+                gameState.entityRoom = 'corridor';
+                updateUI();
+                playSound('success');
+            }
+        }
+
+        // 触发实体事件
+        function triggerEntityEvent() {
+            const events = [
+                '远处传来关节摩擦的咔咔声...',
+                '墙壁里传出低沉的呼噜声...',
+                '天花板上有什么在爬行...刮擦声...刮擦声...',
+                '你听到急促的爬行声正在接近！'
+            ];
+            addNarrative(events[Math.floor(Math.random() * events.length)]);
+
+            if (Math.random() < 0.3) {
+                triggerJumpscare('medium');
+            }
+        }
+
+        // 触发跳吓
+        function triggerJumpscare(level) {
+            let damage = 0;
+            let heartIncrease = 0;
+
+            switch (level) {
+                case 'light':
+                    damage = 5;
+                    heartIncrease = 15;
+                    addNarrative('【轻度惊吓】');
+                    break;
+                case 'medium':
+                    damage = 15;
+                    heartIncrease = 35;
+                    addNarrative('【中度惊吓】嘎啦啦——！！');
+                    flashScreen();
+                    break;
+                case 'heavy':
+                    damage = 35;
+                    heartIncrease = 60;
+                    addNarrative('【重度惊吓】呜呀啊——！！！咔！！');
+                    flashScreen();
+                    shakeScreen();
+                    break;
+            }
+
+            gameState.hp = Math.max(0, gameState.hp - damage);
+            gameState.heartRate = Math.min(180, gameState.heartRate + heartIncrease);
+            gameState.sanity = Math.max(0, gameState.sanity - damage / 2);
+
+            updateUI();
+
+            if (gameState.hp <= 0) {
+                gameOver('bad');
+            }
+
+            playSound('jumpscare');
+        }
+
+        // 屏幕闪烁
+        function flashScreen() {
+            canvas.style.filter = 'brightness(3)';
+            setTimeout(() => {
+                canvas.style.filter = 'brightness(1)';
+            }, 100);
+        }
+
+        // 屏幕震动
+        function shakeScreen() {
+            let shakeCount = 0;
+            const shakeInterval = setInterval(() => {
+                canvas.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+                shakeCount++;
+                if (shakeCount > 10) {
+                    clearInterval(shakeInterval);
+                    canvas.style.transform = 'translate(0, 0)';
+                }
+            }, 50);
+        }
+
+        // 最终选择
+        function showFinalChoice() {
+            const choice = prompt('选择结局：\n1. 绿色按钮（立即逃脱）\n2. 黄色按钮（困住实体）\n3. 红色按钮（完全销毁）\n\n输入数字1-3：');
+
+            switch (choice) {
+                case '1':
+                    gameOver('cursed');
+                    break;
+                case '2':
+                    gameOver('neutral');
+                    break;
+                case '3':
+                    if (gameState.hp >= 50 && gameState.solvedPuzzles.length >= 2) {
+                        gameOver('true');
+                    } else {
+                        addNarrative('你太虚弱了...无法在60秒内逃离...');
+                        gameOver('bad');
+                    }
+                    break;
+                default:
+                    addNarrative('你犹豫了太久...门破碎了！');
+                    triggerJumpscare('heavy');
+            }
+        }
+
+        // 游戏结束
+        function gameOver(ending) {
+            gameState.isPlaying = false;
+
+            const endings = {
+                true: `\n\n╔══════════════════════════════╗
+║        【真·逃脱】           ║
+╚══════════════════════════════╝
+
+你按下红色按钮。
+
+【警告：设施自毁程序启动】
+【倒计时：60秒】
+
+你转身狂奔！
+爆炸声在身后响起！
+你冲出紧急出口！
+
+寒冷的夜风扑面而来。
+你活下来了。
+它...已经被永远埋葬了。
+
+【完美结局】`,
+
+                cursed: `\n\n╔══════════════════════════════╗
+║        【诅咒·逃脱】         ║
+╚══════════════════════════════╝
+
+你按下绿色按钮。
+门打开了，你冲了出去。
+
+你活下来了。
+
+但在你身后，设施的门仍然敞开着。
+黑暗中，有什么正在爬出来...
+红色的光在黑暗中闪烁。
+
+【嘎啦啦——】
+
+它...自由了。
+
+【你活了下来，但世界将为此付出代价】`,
+
+                neutral: `\n\n╔══════════════════════════════╗
+║        【部分逃脱】          ║
+╚══════════════════════════════╝
+
+你按下黄色按钮。
+设施进入部分封锁。
+
+你逃脱了。
+它被困在里面...暂时的。
+
+10小时后，封锁会自动解除。
+
+你只是争取了时间...`,
+
+                bad: `\n\n╔══════════════════════════════╗
+║        【Bad Ending】        ║
+╚══════════════════════════════╝
+
+你倒在地上，HP归零。
+你太虚弱了...无法再逃跑...
+
+黑暗中，爬行声越来越近...
+咔...咔...咔...
+
+它缓慢地爬向你。
+红色的光芒在眼眶中燃烧。
+
+【嘎啦啦——】
+
+画面变黑。
+
+【你成为了第29号标本】`
+            };
+
+            addNarrative(endings[ending] || endings.bad);
+
+            setTimeout(() => {
+                if (confirm('游戏结束。是否重新开始？')) {
+                    location.reload();
+                }
+            }, 3000);
+        }
+
+        // 音效（简化版）
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            switch (type) {
+                case 'jumpscare':
+                    oscillator.frequency.value = 100;
+                    gainNode.gain.value = 0.3;
+                    break;
+                case 'door':
+                    oscillator.frequency.value = 200;
+                    gainNode.gain.value = 0.1;
+                    break;
+                case 'success':
+                    oscillator.frequency.value = 600;
+                    gainNode.gain.value = 0.1;
+                    break;
+                case 'fail':
+                    oscillator.frequency.value = 80;
+                    gainNode.gain.value = 0.2;
+                    break;
+                default:
+                    oscillator.frequency.value = 440;
+                    gainNode.gain.value = 0.1;
+            }
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        // 初始化
+        updateUI();
+    </script>
+</body>
+</html>
