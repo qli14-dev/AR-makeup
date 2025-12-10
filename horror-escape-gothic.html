@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tenant - Gothic Cathedral Escape</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #000;
+            color: #d4d4d4;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: #000;
+        }
+
+        /* Intro Screen */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000814 0%, #001021 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 3s;
+        }
+
+        #intro-screen h1 {
+            font-size: 5em;
+            color: #4a9eff;
+            text-shadow: 0 0 40px #4a9eff, 0 0 80px #2a5eaa;
+            margin-bottom: 50px;
+            letter-spacing: 20px;
+            font-family: 'Georgia', serif;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 0 40px #4a9eff, 0 0 80px #2a5eaa;
+            }
+            50% {
+                opacity: 0.7;
+                text-shadow: 0 0 60px #4a9eff, 0 0 120px #2a5eaa, 0 0 160px #1a3e7a;
+            }
+        }
+
+        #intro-screen p {
+            max-width: 800px;
+            text-align: center;
+            line-height: 2.2;
+            margin-bottom: 20px;
+            color: #8ba3bf;
+            font-size: 1.2em;
+        }
+
+        #start-button {
+            margin-top: 50px;
+            padding: 25px 70px;
+            background: linear-gradient(180deg, #1a3e7a 0%, #0a1e3a 100%);
+            border: 3px solid #4a9eff;
+            color: #fff;
+            font-family: 'Georgia', serif;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 0 40px rgba(74, 158, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        #start-button:hover {
+            background: linear-gradient(180deg, #2a5eaa 0%, #1a3e7a 100%);
+            box-shadow: 0 0 80px rgba(74, 158, 255, 0.8), 0 0 120px rgba(74, 158, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Main Game View */
+        #main-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Gothic Cathedral Room */
+        #room-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg,
+                #0a1520 0%,
+                #0f1a25 20%,
+                #1a2530 50%,
+                #0f1a25 80%,
+                #0a1520 100%);
+            perspective: 1200px;
+            overflow: hidden;
+        }
+
+        /* Blue-green fog overlay */
+        .fog-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 60%,
+                rgba(42, 94, 120, 0.3) 0%,
+                rgba(26, 62, 90, 0.2) 40%,
+                transparent 70%);
+            pointer-events: none;
+            animation: fogDrift 20s infinite ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes fogDrift {
+            0%, 100% {
+                transform: translateX(-10px) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateX(10px) scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        /* Second fog layer */
+        .fog-layer-2 {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 30% 70%,
+                rgba(60, 120, 140, 0.2) 0%,
+                transparent 60%);
+            pointer-events: none;
+            animation: fogDrift2 25s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        @keyframes fogDrift2 {
+            0%, 100% {
+                transform: translateX(15px) translateY(-5px);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateX(-15px) translateY(5px);
+                opacity: 0.7;
+            }
+        }
+
+        /* Stone floor with wet reflections */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            background: linear-gradient(180deg,
+                #1a2530 0%,
+                #2a3540 30%,
+                #1a2530 100%);
+            background-image:
+                repeating-linear-gradient(90deg,
+                    transparent 0px,
+                    rgba(0,0,0,0.4) 120px,
+                    transparent 240px),
+                repeating-linear-gradient(0deg,
+                    transparent 0px,
+                    rgba(0,0,0,0.3) 150px,
+                    transparent 300px);
+            transform: perspective(1000px) rotateX(65deg);
+            transform-origin: bottom;
+            box-shadow:
+                inset 0 0 100px rgba(0,0,0,0.8),
+                inset 0 20px 60px rgba(42, 94, 120, 0.2);
+            z-index: 3;
+        }
+
+        /* Wet reflection effect */
+        .floor::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg,
+                rgba(74, 158, 255, 0.15) 0%,
+                transparent 50%);
+            mix-blend-mode: overlay;
+        }
+
+        /* Stone walls */
+        .back-wall {
+            position: absolute;
+            top: 8%;
+            left: 5%;
+            width: 90%;
+            height: 55%;
+            background: linear-gradient(180deg,
+                #1a2530 0%,
+                #2a3540 50%,
+                #1a2530 100%);
+            background-image:
+                repeating-linear-gradient(0deg,
+                    rgba(0,0,0,0.3),
+                    rgba(0,0,0,0.3) 60px,
+                    transparent 60px,
+                    transparent 120px);
+            border: 2px solid #0f1a25;
+            box-shadow:
+                inset 0 0 120px rgba(0,0,0,0.9),
+                inset 20px 0 60px rgba(0,0,0,0.7),
+                inset -20px 0 60px rgba(0,0,0,0.7);
+            z-index: 4;
+        }
+
+        /* Gothic arches */
+        .arch {
+            position: absolute;
+            top: 10%;
+            width: 200px;
+            height: 300px;
+            border: 15px solid #2a3540;
+            border-bottom: none;
+            border-radius: 100px 100px 0 0;
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.9),
+                0 0 30px rgba(42, 94, 120, 0.3);
+            background: linear-gradient(180deg,
+                rgba(10, 21, 32, 0.8) 0%,
+                transparent 100%);
+        }
+
+        .arch-left {
+            left: 10%;
+        }
+
+        .arch-center {
+            left: 50%;
+            transform: translateX(-50%);
+            height: 350px;
+            width: 220px;
+        }
+
+        .arch-right {
+            right: 10%;
+        }
+
+        /* Stone columns */
+        .column {
+            position: absolute;
+            bottom: 20%;
+            width: 80px;
+            height: 40%;
+            background: linear-gradient(90deg,
+                #1a2530 0%,
+                #2a3540 30%,
+                #3a4550 50%,
+                #2a3540 70%,
+                #1a2530 100%);
+            border-top: 20px solid #3a4550;
+            border-bottom: 20px solid #2a3540;
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.8),
+                -10px 20px 50px rgba(0,0,0,0.9);
+            z-index: 15;
+        }
+
+        .column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                transparent 0px,
+                rgba(0,0,0,0.3) 40px,
+                transparent 80px);
+        }
+
+        .column-left {
+            left: 12%;
+        }
+
+        .column-right {
+            right: 12%;
+        }
+
+        /* Candlelight sources - warm orange */
+        .candle {
+            position: absolute;
+            width: 15px;
+            height: 60px;
+            background: linear-gradient(180deg,
+                #3a2a1a 0%,
+                #4a3a2a 100%);
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        }
+
+        .candle::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 35px;
+            background: radial-gradient(ellipse at center,
+                #ffaa44 0%,
+                #ff8844 30%,
+                #ff6633 60%,
+                transparent 100%);
+            border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+            animation: flameFlicker 0.2s infinite;
+            filter: blur(2px);
+        }
+
+        .candle::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at center,
+                rgba(255, 170, 68, 0.4) 0%,
+                rgba(255, 136, 68, 0.2) 30%,
+                transparent 60%);
+            pointer-events: none;
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes flameFlicker {
+            0%, 100% {
+                transform: translateX(-50%) scaleY(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(-50%) scaleY(0.95);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.8; }
+        }
+
+        .candle-left {
+            bottom: 28%;
+            left: 8%;
+        }
+
+        .candle-right {
+            bottom: 28%;
+            right: 8%;
+        }
+
+        .candle-center {
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Blue ambient light sources */
+        .blue-light {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at center,
+                rgba(74, 158, 255, 0.3) 0%,
+                rgba(42, 94, 170, 0.15) 40%,
+                transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: bluePulse 4s infinite;
+        }
+
+        @keyframes bluePulse {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .blue-light-1 {
+            top: 10%;
+            left: 20%;
+        }
+
+        .blue-light-2 {
+            top: 15%;
+            right: 25%;
+        }
+
+        /* Volumetric light shafts */
+        .light-shaft {
+            position: absolute;
+            top: 5%;
+            width: 100px;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(74, 158, 255, 0.2) 0%,
+                rgba(74, 158, 255, 0.1) 50%,
+                transparent 100%);
+            transform: perspective(800px) rotateX(10deg);
+            pointer-events: none;
+            opacity: 0.5;
+            animation: shaftSway 8s infinite ease-in-out;
+        }
+
+        @keyframes shaftSway {
+            0%, 100% { transform: perspective(800px) rotateX(10deg) translateX(0); }
+            50% { transform: perspective(800px) rotateX(10deg) translateX(10px); }
+        }
+
+        .light-shaft-1 {
+            left: 25%;
+        }
+
+        .light-shaft-2 {
+            right: 30%;
+            animation-delay: 2s;
+        }
+
+        /* INTERACTIVE GOTHIC OBJECTS */
+
+        /* Ancient Door */
+        .door {
+            position: absolute;
+            bottom: 18%;
+            left: 3%;
+            width: 140px;
+            height: 260px;
+            background: linear-gradient(90deg,
+                #1a1410 0%,
+                #2a2420 30%,
+                #3a3430 50%,
+                #2a2420 70%,
+                #1a1410 100%);
+            border: 5px solid #0a0806;
+            border-radius: 10px 10px 0 0;
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.9),
+                -8px 15px 60px rgba(0,0,0,0.9),
+                0 0 30px rgba(74, 158, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 20;
+        }
+
+        .door::before {
+            content: '✞';
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            color: #4a9eff;
+            text-shadow: 0 0 20px #4a9eff;
+            opacity: 0.4;
+        }
+
+        .door::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            background: #2a5eaa;
+            border-radius: 50%;
+            box-shadow:
+                inset 0 2px 5px rgba(0,0,0,0.8),
+                0 0 15px rgba(74, 158, 255, 0.5);
+        }
+
+        .door:hover {
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.9),
+                -8px 15px 60px rgba(0,0,0,0.9),
+                0 0 50px rgba(74, 158, 255, 0.6);
+            filter: brightness(1.2);
+        }
+
+        /* Broken Statue */
+        .statue {
+            position: absolute;
+            bottom: 22%;
+            left: 15%;
+            width: 100px;
+            height: 200px;
+            background: linear-gradient(180deg,
+                #4a5560 0%,
+                #3a4550 50%,
+                #2a3540 100%);
+            clip-path: polygon(30% 0%, 70% 0%, 80% 100%, 20% 100%);
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.7),
+                -5px 10px 40px rgba(0,0,0,0.8),
+                0 0 20px rgba(74, 158, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 18;
+        }
+
+        .statue::before {
+            content: '🗿';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 50px;
+            opacity: 0.6;
+            filter: grayscale(1) brightness(0.7);
+        }
+
+        .statue:hover {
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.7),
+                -5px 10px 40px rgba(0,0,0,0.8),
+                0 0 40px rgba(74, 158, 255, 0.5);
+        }
+
+        /* Stone Altar (replaces desk) */
+        .altar {
+            position: absolute;
+            bottom: 24%;
+            right: 10%;
+            width: 220px;
+            height: 140px;
+            background: linear-gradient(180deg,
+                #3a4550 0%,
+                #2a3540 100%);
+            border: 3px solid #1a2530;
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.8),
+                0 15px 50px rgba(0,0,0,0.9),
+                0 0 25px rgba(255, 170, 68, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 17;
+            transform: perspective(600px) rotateY(-8deg);
+        }
+
+        .altar::before {
+            content: '📜';
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            font-size: 50px;
+            opacity: 0.7;
+        }
+
+        .altar::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            width: 15px;
+            height: 30px;
+            background: #2a3540;
+            box-shadow: 165px 0 0 #2a3540;
+        }
+
+        .altar:hover {
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.8),
+                0 15px 50px rgba(0,0,0,0.9),
+                0 0 45px rgba(255, 170, 68, 0.5);
+        }
+
+        /* Ancient Bookshelf */
+        .reliquary {
+            position: absolute;
+            top: 22%;
+            right: 6%;
+            width: 150px;
+            height: 220px;
+            background: linear-gradient(90deg,
+                #2a2420 0%,
+                #3a3430 50%,
+                #2a2420 100%);
+            border: 4px solid #1a1410;
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.9),
+                -10px 15px 50px rgba(0,0,0,0.9),
+                0 0 20px rgba(74, 158, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 16;
+        }
+
+        .reliquary::before {
+            content: '📚';
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 45px;
+            opacity: 0.6;
+            filter: sepia(0.8);
+        }
+
+        .reliquary::after {
+            content: '';
+            position: absolute;
+            top: 35%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0a0806;
+            box-shadow: 0 30% 0 #0a0806;
+        }
+
+        .reliquary:hover {
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.9),
+                -10px 15px 50px rgba(0,0,0,0.9),
+                0 0 40px rgba(74, 158, 255, 0.5);
+        }
+
+        /* Cracked Mirror */
+        .mirror {
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 110px;
+            height: 180px;
+            background: linear-gradient(135deg,
+                #1a2a3a 0%,
+                #2a3a4a 25%,
+                #1a2a3a 50%,
+                #2a3a4a 75%,
+                #1a2a3a 100%);
+            border: 8px solid #2a3540;
+            border-radius: 8px;
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,0.9),
+                -6px 10px 40px rgba(0,0,0,0.8),
+                0 0 30px rgba(74, 158, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 16;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mirror::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                transparent 0%,
+                rgba(74, 158, 255, 0.2) 45%,
+                transparent 50%,
+                rgba(74, 158, 255, 0.2) 55%,
+                transparent 100%);
+        }
+
+        .mirror::after {
+            content: '';
+            position: absolute;
+            bottom: 15%;
+            left: 15%;
+            width: 50px;
+            height: 80px;
+            border-right: 3px solid rgba(74, 158, 255, 0.4);
+            transform: rotate(25deg);
+        }
+
+        .mirror:hover {
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,0.9),
+                -6px 10px 40px rgba(0,0,0,0.8),
+                0 0 50px rgba(74, 158, 255, 0.6);
+        }
+
+        /* Sacred Painting */
+        .painting {
+            position: absolute;
+            top: 18%;
+            left: 35%;
+            width: 200px;
+            height: 160px;
+            background: linear-gradient(180deg,
+                #0a0a1a 0%,
+                #1a1a2a 100%);
+            border: 10px solid #2a3540;
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.95),
+                0 12px 40px rgba(0,0,0,0.9),
+                0 0 25px rgba(74, 158, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: rotate(-1deg);
+            z-index: 15;
+        }
+
+        .painting::before {
+            content: '✝️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 70px;
+            opacity: 0.3;
+            filter: blur(2px);
+            text-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
+        }
+
+        .painting:hover {
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.95),
+                0 12px 40px rgba(0,0,0,0.9),
+                0 0 45px rgba(74, 158, 255, 0.5);
+            transform: rotate(-1deg) scale(1.02);
+        }
+
+        /* Stone Sarcophagus (mattress replacement) */
+        .sarcophagus {
+            position: absolute;
+            bottom: 26%;
+            left: 22%;
+            width: 280px;
+            height: 130px;
+            background: linear-gradient(180deg,
+                #3a4550 0%,
+                #2a3540 100%);
+            border: 3px solid #1a2530;
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.7),
+                0 18px 50px rgba(0,0,0,0.9),
+                0 0 20px rgba(74, 158, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: perspective(500px) rotateX(12deg);
+            z-index: 14;
+        }
+
+        .sarcophagus::before {
+            content: '⚰️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            opacity: 0.5;
+        }
+
+        .sarcophagus:hover {
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.7),
+                0 18px 50px rgba(0,0,0,0.9),
+                0 0 40px rgba(74, 158, 255, 0.4);
+        }
+
+        /* Clay Jars (carpet replacement) */
+        .jars {
+            position: absolute;
+            bottom: 24%;
+            left: 50%;
+            width: 180px;
+            height: 100px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 13;
+        }
+
+        .jar {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(180deg,
+                #4a3a2a 0%,
+                #3a2a1a 100%);
+            border-radius: 25px 25px 10px 10px;
+            box-shadow:
+                inset 0 0 20px rgba(0,0,0,0.6),
+                5px 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .jar-1 {
+            left: 0;
+            transform: perspective(400px) rotateY(-10deg);
+        }
+
+        .jar-2 {
+            left: 60px;
+            transform: perspective(400px) rotateY(5deg);
+        }
+
+        .jar-3 {
+            left: 120px;
+            transform: perspective(400px) rotateY(-5deg);
+        }
+
+        .jars:hover .jar {
+            box-shadow:
+                inset 0 0 20px rgba(0,0,0,0.6),
+                5px 10px 30px rgba(0,0,0,0.8),
+                0 0 25px rgba(255, 170, 68, 0.4);
+        }
+
+        /* Stone Pedestal (coffee table) */
+        .pedestal {
+            position: absolute;
+            bottom: 28%;
+            right: 28%;
+            width: 140px;
+            height: 90px;
+            background: linear-gradient(180deg,
+                #3a4550 0%,
+                #2a3540 100%);
+            border: 2px solid #1a2530;
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.7),
+                0 15px 40px rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: perspective(400px) rotateX(8deg);
+            z-index: 12;
+        }
+
+        .pedestal::before {
+            content: '🕯️';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+        }
+
+        .pedestal::after {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 25px;
+            background: #2a3540;
+        }
+
+        .pedestal:hover {
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.7),
+                0 15px 40px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 170, 68, 0.4);
+        }
+
+        /* Iron Grate (radiator) */
+        .grate {
+            position: absolute;
+            bottom: 28%;
+            right: 12%;
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(90deg,
+                #2a2a2a 0%,
+                #3a3a3a 50%,
+                #2a2a2a 100%);
+            border: 2px solid #1a1a1a;
+            box-shadow:
+                inset 0 0 25px rgba(0,0,0,0.8),
+                6px 12px 35px rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 11;
+        }
+
+        .grate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg,
+                transparent 0px,
+                rgba(0,0,0,0.5) 12px,
+                transparent 24px);
+        }
+
+        .grate:hover {
+            box-shadow:
+                inset 0 0 25px rgba(0,0,0,0.8),
+                6px 12px 35px rgba(0,0,0,0.8),
+                0 0 30px rgba(74, 158, 255, 0.4);
+        }
+
+        /* Ceiling Vent */
+        .vent {
+            position: absolute;
+            top: 12%;
+            right: 22%;
+            width: 90px;
+            height: 55px;
+            background: linear-gradient(180deg,
+                #0a0a0a 0%,
+                #1a1a1a 100%);
+            border: 2px solid #2a2a2a;
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.95),
+                0 6px 20px rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .vent::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                transparent 0px,
+                rgba(74, 158, 255, 0.1) 10px,
+                transparent 20px);
+        }
+
+        .vent:hover {
+            box-shadow:
+                inset 0 0 30px rgba(0,0,0,0.95),
+                0 6px 20px rgba(0,0,0,0.8),
+                0 0 30px rgba(74, 158, 255, 0.5);
+        }
+
+        /* Stone Wardrobe */
+        .wardrobe {
+            position: absolute;
+            top: 16%;
+            left: 2%;
+            width: 140px;
+            height: 270px;
+            background: linear-gradient(90deg,
+                #2a3540 0%,
+                #3a4550 50%,
+                #2a3540 100%);
+            border: 5px solid #1a2530;
+            border-radius: 5px 5px 0 0;
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,0.9),
+                -10px 18px 50px rgba(0,0,0,0.95);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 19;
+        }
+
+        .wardrobe::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px;
+            height: 85%;
+            background: #0a1520;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.95);
+        }
+
+        .wardrobe::after {
+            content: '🔒';
+            position: absolute;
+            top: 48%;
+            left: 35%;
+            font-size: 30px;
+            opacity: 0.5;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+        }
+
+        .wardrobe:hover {
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,0.9),
+                -10px 18px 50px rgba(0,0,0,0.95),
+                0 0 35px rgba(74, 158, 255, 0.4);
+        }
+
+        /* Window opening */
+        .window {
+            position: absolute;
+            top: 17%;
+            left: 28%;
+            width: 220px;
+            height: 150px;
+            background: #000;
+            border: 5px solid #2a3540;
+            border-radius: 100px 100px 0 0;
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,1),
+                0 0 30px rgba(74, 158, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 14;
+        }
+
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 100px;
+            background: radial-gradient(circle at center,
+                rgba(74, 158, 255, 0.1) 0%,
+                transparent 60%);
+        }
+
+        .window:hover {
+            box-shadow:
+                inset 0 0 60px rgba(0,0,0,1),
+                0 0 50px rgba(74, 158, 255, 0.5);
+        }
+
+        /* Floating light particles */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(74, 158, 255, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(74, 158, 255, 0.8);
+            animation: particleFloat 15s infinite linear;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-20vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Orange particle variant */
+        .particle-warm {
+            background: rgba(255, 170, 68, 0.7);
+            box-shadow: 0 0 10px rgba(255, 136, 68, 0.9);
+        }
+
+        /* UI Elements - Gothic styled */
+        #inventory {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            background: linear-gradient(180deg,
+                rgba(10, 21, 32, 0.98) 0%,
+                rgba(5, 10, 16, 0.98) 100%);
+            border: 3px solid #4a9eff;
+            padding: 25px;
+            min-width: 280px;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow:
+                0 0 50px rgba(74, 158, 255, 0.6),
+                inset 0 0 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+        }
+
+        #inventory h3 {
+            margin-bottom: 18px;
+            color: #4a9eff;
+            font-size: 1.4em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Georgia', serif;
+            border-bottom: 2px solid #2a5eaa;
+            padding-bottom: 12px;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.8);
+        }
+
+        .inventory-item {
+            background: rgba(42, 94, 170, 0.15);
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #2a5eaa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-family: 'Georgia', serif;
+        }
+
+        .inventory-item:hover {
+            background: rgba(74, 158, 255, 0.3);
+            border-color: #4a9eff;
+            transform: translateX(8px);
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
+        }
+
+        #log {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(180deg,
+                rgba(10, 21, 32, 0.98) 0%,
+                rgba(5, 10, 16, 0.98) 100%);
+            border: 3px solid #4a9eff;
+            padding: 25px;
+            width: 450px;
+            max-height: 280px;
+            overflow-y: auto;
+            border-radius: 10px;
+            font-size: 1em;
+            box-shadow:
+                0 0 50px rgba(74, 158, 255, 0.6),
+                inset 0 0 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+            font-family: 'Georgia', serif;
+        }
+
+        .log-entry {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #2a5eaa;
+            padding-left: 18px;
+            animation: slideIn 0.5s;
+            line-height: 1.8;
+        }
+
+        .log-entry.important {
+            color: #4a9eff;
+            font-weight: bold;
+            border-left-color: #4a9eff;
+            background: rgba(74, 158, 255, 0.1);
+            border-radius: 4px;
+            text-shadow: 0 0 5px rgba(74, 158, 255, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #timer {
+            position: absolute;
+            top: 35px;
+            right: 35px;
+            background: linear-gradient(180deg,
+                rgba(10, 21, 32, 0.98) 0%,
+                rgba(5, 10, 16, 0.98) 100%);
+            padding: 25px 45px;
+            border: 3px solid #4a9eff;
+            border-radius: 10px;
+            font-size: 2.2em;
+            color: #4a9eff;
+            text-shadow: 0 0 20px #4a9eff;
+            box-shadow: 0 0 50px rgba(74, 158, 255, 0.6);
+            font-weight: bold;
+            letter-spacing: 4px;
+            z-index: 100;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Modal - Gothic theme */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #modal-content {
+            background: linear-gradient(180deg,
+                #0a1520 0%,
+                #050a10 100%);
+            padding: 50px;
+            border: 5px solid #4a9eff;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 15px;
+            box-shadow:
+                0 0 100px rgba(74, 158, 255, 0.8),
+                inset 0 0 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        #modal-content h2 {
+            color: #4a9eff;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-size: 2em;
+            border-bottom: 3px solid #2a5eaa;
+            padding-bottom: 18px;
+            font-family: 'Georgia', serif;
+            text-shadow: 0 0 15px rgba(74, 158, 255, 0.8);
+        }
+
+        #modal-content p {
+            line-height: 2.2;
+            margin-bottom: 22px;
+            font-size: 1.15em;
+            font-family: 'Georgia', serif;
+        }
+
+        #close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2a5eaa;
+            border: 3px solid #4a9eff;
+            color: #fff;
+            padding: 14px 24px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            border-radius: 6px;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        #close-modal:hover {
+            background: #4a9eff;
+            box-shadow: 0 0 25px rgba(74, 158, 255, 0.9);
+            transform: scale(1.1);
+        }
+
+        .action-button {
+            display: inline-block;
+            margin: 18px 10px;
+            padding: 18px 36px;
+            background: linear-gradient(180deg,
+                #1a3e7a 0%,
+                #0a1e3a 100%);
+            border: 3px solid #4a9eff;
+            color: #d4d4d4;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s;
+            border-radius: 6px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(180deg,
+                #2a5eaa 0%,
+                #1a3e7a 100%);
+            border-color: #4a9eff;
+            box-shadow: 0 0 25px rgba(74, 158, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .action-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .code-input {
+            width: 280px;
+            padding: 18px;
+            background: #000;
+            border: 3px solid #2a5eaa;
+            color: #4a9eff;
+            font-family: 'Georgia', serif;
+            font-size: 1.6em;
+            text-align: center;
+            border-radius: 6px;
+            margin: 18px;
+            letter-spacing: 8px;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 30px rgba(74, 158, 255, 0.7);
+        }
+
+        /* Jumpscare */
+        #jumpscare {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jumpscare-image {
+            font-size: 20em;
+            animation: scareZoom 0.3s;
+            filter: drop-shadow(0 0 80px rgba(74, 158, 255, 0.9));
+        }
+
+        @keyframes scareZoom {
+            from {
+                transform: scale(0.05) rotate(-90deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Ending Screen */
+        #ending-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg,
+                #000814 0%,
+                #001021 100%);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            text-align: center;
+        }
+
+        #ending-screen h1 {
+            font-size: 4.5em;
+            margin-bottom: 50px;
+            text-shadow: 0 0 40px currentColor;
+            animation: pulse 2.5s infinite;
+            letter-spacing: 12px;
+            font-family: 'Georgia', serif;
+        }
+
+        #ending-screen.good h1 {
+            color: #4a9eff;
+        }
+
+        #ending-screen.bad h1 {
+            color: #ff4444;
+        }
+
+        #ending-screen.secret h1 {
+            color: #9d4edd;
+        }
+
+        #ending-screen p {
+            max-width: 900px;
+            line-height: 2.4;
+            font-size: 1.4em;
+            margin-bottom: 30px;
+            font-family: 'Georgia', serif;
+        }
+
+        .uv-message {
+            display: none;
+            color: #bf00ff;
+            text-shadow: 0 0 20px #bf00ff;
+            font-weight: bold;
+            animation: uvGlow 1.2s infinite alternate;
+        }
+
+        @keyframes uvGlow {
+            from { text-shadow: 0 0 15px #bf00ff; }
+            to { text-shadow: 0 0 35px #bf00ff, 0 0 50px #9d00cc; }
+        }
+
+        .uv-active .uv-message {
+            display: block;
+        }
+
+        .uv-active {
+            filter: hue-rotate(270deg) saturate(3) brightness(0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a5eaa;
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a9eff;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Intro Screen -->
+        <div id="intro-screen">
+            <h1>THE TENANT</h1>
+            <p>You wake in an abandoned Gothic cathedral, deep underground.</p>
+            <p>This sacred place has been violated. Corrupted. Forbidden rituals were performed here.</p>
+            <p>Cold stone walls whisper ancient secrets. Blue fog drifts through the shadows.</p>
+            <p>Candlelight flickers. Something watches from the darkness.</p>
+            <p style="color: #4a9eff; margin-top: 35px; font-size: 1.3em;">You must solve the cathedral's mysteries to escape.</p>
+            <p style="color: #8ba3bf; margin-top: 25px; font-size: 1.15em;">But the walls remember everything. And they are not empty.</p>
+            <button id="start-button">Enter the Chapel</button>
+        </div>
+
+        <!-- Main Game View -->
+        <div id="main-view">
+            <div id="timer">30:00</div>
+
+            <div id="room-view">
+                <!-- Atmospheric layers -->
+                <div class="fog-layer"></div>
+                <div class="fog-layer-2"></div>
+
+                <!-- Room structure -->
+                <div class="back-wall"></div>
+                <div class="floor"></div>
+
+                <!-- Gothic architecture -->
+                <div class="arch arch-left"></div>
+                <div class="arch arch-center"></div>
+                <div class="arch arch-right"></div>
+                <div class="column column-left"></div>
+                <div class="column column-right"></div>
+
+                <!-- Lighting -->
+                <div class="candle candle-left"></div>
+                <div class="candle candle-center"></div>
+                <div class="candle candle-right"></div>
+                <div class="blue-light blue-light-1"></div>
+                <div class="blue-light blue-light-2"></div>
+                <div class="light-shaft light-shaft-1"></div>
+                <div class="light-shaft light-shaft-2"></div>
+
+                <!-- Interactive Objects (Gothic themed) -->
+                <div class="door" data-object="door" title="Ancient Chapel Door"></div>
+                <div class="statue" data-object="bookshelf" title="Broken Statue"></div>
+                <div class="altar" data-object="desk" title="Stone Altar"></div>
+                <div class="reliquary" data-object="bookshelf" title="Ancient Reliquary"></div>
+                <div class="mirror" data-object="mirror" title="Cursed Mirror"></div>
+                <div class="painting" data-object="painting" title="Sacred Painting"></div>
+                <div class="wardrobe" data-object="wardrobe" title="Stone Vault"></div>
+                <div class="window" data-object="window" title="Dark Archway"></div>
+                <div class="sarcophagus" data-object="mattress" title="Stone Sarcophagus"></div>
+                <div class="jars" data-object="carpet" title="Ancient Urns">
+                    <div class="jar jar-1"></div>
+                    <div class="jar jar-2"></div>
+                    <div class="jar jar-3"></div>
+                </div>
+                <div class="pedestal" data-object="coffee-table" title="Stone Pedestal"></div>
+                <div class="grate" data-object="radiator" title="Iron Grate"></div>
+                <div class="vent" data-object="vent" title="Ceiling Vent"></div>
+
+                <!-- Floating particles -->
+                <div class="particle" style="left: 15%; animation-delay: 0s;"></div>
+                <div class="particle" style="left: 35%; animation-delay: 3s;"></div>
+                <div class="particle" style="left: 55%; animation-delay: 6s;"></div>
+                <div class="particle" style="left: 75%; animation-delay: 9s;"></div>
+                <div class="particle" style="left: 25%; animation-delay: 2s;"></div>
+                <div class="particle" style="left: 65%; animation-delay: 7s;"></div>
+                <div class="particle particle-warm" style="left: 20%; animation-delay: 1s;"></div>
+                <div class="particle particle-warm" style="left: 50%; animation-delay: 5s;"></div>
+                <div class="particle particle-warm" style="left: 80%; animation-delay: 8s;"></div>
+            </div>
+
+            <div id="inventory">
+                <h3>Inventory</h3>
+                <div id="inventory-items"></div>
+            </div>
+
+            <div id="log">
+                <div class="log-entry">You wake on cold stone...</div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal">
+            <div id="modal-content">
+                <button id="close-modal">✕</button>
+                <h2 id="modal-title"></h2>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+
+        <!-- Jumpscare -->
+        <div id="jumpscare">
+            <div class="jumpscare-image"></div>
+        </div>
+
+        <!-- Ending Screen -->
+        <div id="ending-screen">
+            <h1 id="ending-title"></h1>
+            <div id="ending-text"></div>
+        </div>
+    </div>
+
+    <script src="horror-escape-game.js"></script>
+</body>
+</html>
