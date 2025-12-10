@@ -1,13 +1,1212 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR Makeup - Real-time Face Tracking</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>破碎者 - 完整版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #ccc;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 场景画布 */
+        #scene-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI叠加 */
+        .ui-overlay {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .ui-overlay > * {
+            pointer-events: auto;
+        }
+
+        /* 状态栏 - 右上 */
+        #status-hud {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(100, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 16px;
+            min-width: 220px;
+            box-shadow: 0 0 20px rgba(150, 0, 0, 0.3);
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            width: 50px;
+            color: #999;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .stat-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(40, 0, 0, 0.8);
+            border: 1px solid rgba(80, 0, 0, 0.6);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .hp-fill { background: linear-gradient(90deg, #c80000, #ff3232); box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
+        .sanity-fill { background: linear-gradient(90deg, #006496, #0096c8); }
+
+        .stat-value {
+            width: 40px;
+            text-align: right;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .heartbeat-icon {
+            color: #ff0000;
+            font-size: 18px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+        }
+
+        /* 场景描述 - 左上 */
+        #scene-description {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            max-width: 500px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(60, 60, 60, 0.8);
+            border-radius: 4px;
+            padding: 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        #scene-name {
+            font-size: 18px;
+            color: #ff6666;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        #scene-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #bbb;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* 叙述文本 - 底部左 */
+        #narrative {
+            position: absolute;
+            bottom: 180px;
+            left: 20px;
+            right: 20px;
+            max-height: 150px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(60, 60, 60, 0.8);
+            border-radius: 4px;
+            padding: 16px;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .narrative-text {
+            margin: 0 0 10px 0;
+            color: #ccc;
+        }
+
+        .narrative-text:last-child {
+            color: #fff;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 选项面板 - 底部 */
+        #options-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid rgba(80, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 16px;
+            box-shadow: 0 0 30px rgba(150, 0, 0, 0.4);
+        }
+
+        #options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            background: rgba(40, 0, 0, 0.8);
+            border: 1px solid rgba(80, 0, 0, 0.6);
+            border-radius: 3px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: rgba(60, 0, 0, 0.9);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(150, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.high-risk {
+            border-color: rgba(200, 0, 0, 0.8);
+            background: rgba(60, 0, 0, 0.9);
+        }
+
+        .option-btn.high-risk:hover {
+            background: rgba(80, 0, 0, 1);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        }
+
+        /* 开始界面 */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #intro-screen h1 {
+            font-size: 56px;
+            color: #ff0000;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            margin-bottom: 20px;
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        #intro-screen .subtitle {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        #intro-screen .description {
+            font-size: 14px;
+            color: #666;
+            max-width: 600px;
+            margin: 20px auto;
+            line-height: 1.8;
+        }
+
+        #start-btn {
+            margin-top: 40px;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #960000, #640000);
+            border: 2px solid rgba(200, 0, 0, 0.6);
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 0 20px rgba(200, 0, 0, 0.4);
+            transition: all 0.3s;
+        }
+
+        #start-btn:hover {
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            transform: scale(1.05);
+        }
+
+        .hidden { display: none !important; }
+
+        /* 跳吓覆盖层 */
+        #jumpscare-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #jumpscare-overlay.active {
+            display: flex;
+        }
+
+        /* 时间压力提示 */
+        #timer-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #ff0000;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 1);
+            animation: timerPulse 1s infinite;
+            display: none;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 介绍界面 -->
+        <div id="intro-screen">
+            <h1>破 碎 者</h1>
+            <div class="subtitle">The Broken One</div>
+            <div class="subtitle">场景驱动恐怖密室逃脱</div>
+            <div class="description">
+                ⚠️ 警告：强烈恐怖元素 ⚠️<br><br>
+                极度压迫 · 黑暗写实 · 状态机驱动<br>
+                多场景 · 真实画面 · 环境音效 · 分支剧情<br><br>
+                参考：《Outlast》《P.T.》《恶灵附身》<br><br>
+                建议佩戴耳机以获得最佳沉浸感
+            </div>
+            <button id="start-btn" onclick="startGame()">进入黑暗</button>
+        </div>
+
+        <!-- 场景画布 -->
+        <canvas id="scene-canvas"></canvas>
+
+        <!-- 跳吓覆盖 -->
+        <div id="jumpscare-overlay"></div>
+
+        <!-- UI叠加层 -->
+        <div class="ui-overlay">
+            <!-- 状态HUD -->
+            <div id="status-hud" class="hidden">
+                <div class="stat-row">
+                    <span class="stat-label">HP</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill hp-fill" id="hp-bar" style="width: 100%"></div>
+                    </div>
+                    <span class="stat-value" id="hp-value">100</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">心率</span>
+                    <div class="heartbeat">
+                        <span class="heartbeat-icon">♥</span>
+                        <span id="heartrate-value">75 BPM</span>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">理智</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill sanity-fill" id="sanity-bar" style="width: 100%"></div>
+                    </div>
+                    <span class="stat-value" id="sanity-value">100</span>
+                </div>
+            </div>
+
+            <!-- 场景描述 -->
+            <div id="scene-description" class="hidden">
+                <div id="scene-name"></div>
+                <div id="scene-text"></div>
+            </div>
+
+            <!-- 叙述文本 -->
+            <div id="narrative" class="hidden"></div>
+
+            <!-- 选项面板 -->
+            <div id="options-panel" class="hidden">
+                <div id="options-grid"></div>
+            </div>
+
+            <!-- 时间警告 -->
+            <div id="timer-warning"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 游戏状态 =====
+        const GameState = {
+            currentScene: null,
+            player: {
+                hp: 100,
+                heartRate: 75,
+                sanity: 100,
+                noise: 0
+            },
+            inventory: [],
+            flags: {},
+            clues: [],
+            visitedScenes: [],
+            entity: {
+                currentScene: 'corridor',
+                behavior: 'patrol',
+                aggression: 30
+            },
+            gameTime: 0,
+            sceneTime: 0
+        };
+
+        // ===== Canvas设置 =====
+        const canvas = document.getElementById('scene-canvas');
+        const ctx = canvas.getContext('2d');
+        let mouseX = 0, mouseY = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // ===== 场景定义 =====
+        const Scenes = {
+            awakening_room: {
+                id: 'awakening_room',
+                name: '觉醒室',
+                type: 'normal',
+                visual: {
+                    background: 'dark_room',
+                    darkness: 0.8,
+                    fog: 0.4,
+                    decay: 0.7
+                },
+                description: {
+                    initial: `你躺在冰冷的混凝土地面上，慢慢恢复意识。
+
+【墙面】潮湿的混凝土墙，长满暗绿色和黑色的霉斑。
+【地面】生锈的铁板拼接，有暗红色的锈迹和碎玻璃。
+【天花板】低矮的水泥天花板，一盏老旧的白炽灯摇晃着。
+
+角落里有一个老旧的手电筒。
+地上有一张沾满暗红色污渍的纸条。
+北侧有一扇生锈的铁门，上面有四位数密码锁。`
+                },
+                onEnter: function() {
+                    if (!GameState.visitedScenes.includes('awakening_room')) {
+                        narrate('你慢慢恢复意识...头很痛...身体很冷...');
+                        setTimeout(() => {
+                            narrate('你挣扎着站起来，环顾四周。');
+                        }, 2000);
+                        playSound('ambientDrone');
+                    }
+                },
+                getOptions: function() {
+                    const options = [
+                        { text: '[观察] 仔细观察房间', action: 'look_around' },
+                        { text: '[检查] 检查门锁', action: 'examine_door' }
+                    ];
+
+                    if (!GameState.inventory.includes('flashlight')) {
+                        options.push({ text: '[拾取] 拾取手电筒', action: 'take_flashlight' });
+                    }
+
+                    if (!GameState.flags.note_read) {
+                        options.push({ text: '[阅读] 阅读血迹笔记', action: 'read_note' });
+                    }
+
+                    if (GameState.flags.note_read) {
+                        options.push({ text: '[解谜] 输入密码', action: 'solve_door_lock' });
+                    }
+
+                    return options;
+                },
+                handleAction: function(action) {
+                    switch(action) {
+                        case 'look_around':
+                            narrate('你仔细观察房间的每个角落...');
+                            setTimeout(() => {
+                                narrate('墙面有奇怪的刮痕。地面的拖拽痕迹很深。这里发生过什么？');
+                                updateStats({ sanity: -5 });
+                            }, 1000);
+                            break;
+
+                        case 'examine_door':
+                            narrate('铁门上的密码锁已经生锈，但仍然可以转动。需要四位数字。');
+                            break;
+
+                        case 'take_flashlight':
+                            narrate('你拿起手电筒。打开开关——微弱的光照亮了周围。');
+                            GameState.inventory.push('flashlight');
+                            playSound('pickup');
+                            setTimeout(() => {
+                                narrate('【获得物品：手电筒】');
+                                narrate('在手电筒的照射下，你看到墙面上有用指甲刮出的数字...');
+                            }, 1000);
+                            break;
+
+                        case 'read_note':
+                            narrate('你拿起血迹笔记。上面写着：');
+                            setTimeout(() => {
+                                narrate('"...28号房间...第47次实验..."');
+                                narrate('"...如果你看到这张纸条，说明我失败了..."');
+                                narrate('"...密码是...日期和编号...28...47..."');
+                                GameState.flags.note_read = true;
+                                updateStats({ sanity: -10 });
+                            }, 1500);
+                            break;
+
+                        case 'solve_door_lock':
+                            const code = prompt('输入四位数密码：');
+                            if (code === '2847') {
+                                narrate('咔哒——门锁弹开。');
+                                playSound('success');
+                                GameState.flags.door_unlocked = true;
+                                setTimeout(() => {
+                                    changeScene('corridor');
+                                }, 1500);
+                            } else {
+                                narrate('密码错误！警报声响起——');
+                                playSound('fail');
+                                triggerJumpscare('light');
+                                updateStats({ hp: -10, heartRate: 25 });
+                                GameState.entity.aggression += 20;
+                            }
+                            break;
+                    }
+                }
+            },
+
+            corridor: {
+                id: 'corridor',
+                name: '无尽回廊',
+                type: 'encounter',
+                visual: {
+                    background: 'corridor',
+                    darkness: 0.85,
+                    fog: 0.5,
+                    decay: 0.6
+                },
+                description: {
+                    initial: `你进入一条狭窄的走廊。长约15米，宽度仅1.2米。
+
+【墙面】剥落的墙纸，霉菌侵蚀，露出腐烂的墙板。
+【地面】破碎的木质地板，每走一步都发出吱呀声。
+【照明】昏黄的壁灯，每隔几秒闪烁一次。
+
+走廊尽头有一扇虚掩的门，里面一片漆黑。
+
+...你感觉到一种强烈的被注视感...`
+                },
+                onEnter: function() {
+                    narrate('你踏入走廊。木板发出不安的吱呀声。');
+                    updateStats({ heartRate: 15, noise: 30 });
+
+                    // 实体遭遇概率
+                    if (Math.random() < 0.7) {
+                        setTimeout(() => {
+                            narrate('远处传来声音...');
+                            playSound('distantSound');
+                        }, 3000);
+
+                        setTimeout(() => {
+                            triggerEntityEncounter();
+                        }, 5000);
+                    }
+                },
+                getOptions: function() {
+                    const options = [
+                        { text: '[移动] 慢慢前进（低噪音）', action: 'move_slow' },
+                        { text: '[移动] 快速冲刺（高噪音）', action: 'move_fast', risk: 'high' },
+                        { text: '[观察] 观察走廊尽头', action: 'look_corridor' },
+                        { text: '[倾听] 仔细倾听', action: 'listen' }
+                    ];
+
+                    if (GameState.flags.entity_visible) {
+                        options.push({ text: '[逃跑] 全速逃离！', action: 'escape', risk: 'high' });
+                        if (GameState.inventory.includes('salt')) {
+                            options.push({ text: '[使用] 使用盐', action: 'use_salt' });
+                        }
+                    }
+
+                    return options;
+                },
+                handleAction: function(action) {
+                    switch(action) {
+                        case 'move_slow':
+                            narrate('你小心翼翼地前进，尽量不发出声音...');
+                            updateStats({ noise: 10 });
+                            setTimeout(() => {
+                                if (GameState.flags.entity_hunting) {
+                                    narrate('太慢了——它发现了你！');
+                                    triggerJumpscare('medium');
+                                } else {
+                                    narrate('你安全通过了走廊。');
+                                    changeScene('laboratory');
+                                }
+                            }, 2000);
+                            break;
+
+                        case 'move_fast':
+                            narrate('你快速冲刺！脚步声在走廊中回荡！');
+                            updateStats({ noise: 80, heartRate: 30 });
+                            playSound('running');
+                            setTimeout(() => {
+                                if (Math.random() < 0.5) {
+                                    narrate('身后传来急促的爬行声——它在追你！');
+                                    triggerJumpscare('medium');
+                                    updateStats({ hp: -15, heartRate: 50 });
+                                } else {
+                                    narrate('你成功冲进下一个房间！');
+                                    changeScene('laboratory');
+                                }
+                            }, 2000);
+                            break;
+
+                        case 'look_corridor':
+                            narrate('你凝视着走廊尽头的黑暗...');
+                            setTimeout(() => {
+                                narrate('一个高大的轮廓在黑暗中...它在看着你。');
+                                GameState.flags.entity_visible = true;
+                                triggerJumpscare('light');
+                                updateStats({ heartRate: 40, sanity: -20 });
+                            }, 1500);
+                            break;
+
+                        case 'listen':
+                            narrate('你仔细倾听...');
+                            setTimeout(() => {
+                                narrate('关节摩擦的咔咔声...呼吸声...它很近。');
+                                updateStats({ heartRate: 25, sanity: -15 });
+                            }, 1000);
+                            break;
+
+                        case 'escape':
+                            narrate('你转身狂奔！');
+                            updateStats({ noise: 100, heartRate: 60 });
+                            setTimeout(() => {
+                                if (GameState.player.hp > 30) {
+                                    narrate('你冲进下一个房间，砰地关上门！');
+                                    changeScene('laboratory');
+                                } else {
+                                    narrate('你太虚弱了...它抓住了你！');
+                                    triggerGameOver('bad');
+                                }
+                            }, 2000);
+                            break;
+
+                        case 'use_salt':
+                            narrate('你撒出盐——实体发出刺耳的尖叫！');
+                            GameState.inventory = GameState.inventory.filter(i => i !== 'salt');
+                            GameState.flags.entity_hunting = false;
+                            GameState.entity.aggression = Math.max(0, GameState.entity.aggression - 30);
+                            playSound('success');
+                            setTimeout(() => {
+                                narrate('它退却了...暂时安全了。');
+                                changeScene('laboratory');
+                            }, 2000);
+                            break;
+                    }
+                }
+            },
+
+            laboratory: {
+                id: 'laboratory',
+                name: '标本实验室',
+                type: 'puzzle',
+                visual: {
+                    background: 'laboratory',
+                    darkness: 0.7,
+                    fog: 0.3,
+                    decay: 0.8
+                },
+                description: {
+                    initial: `你进入一个破损的实验室。
+
+【中央】生锈的金属手术台，表面布满暗褐色污渍。约束带已断裂。
+【四周】破碎的玻璃陈列柜，福尔马林的刺鼻气味。
+【墙面】深度抓痕排列成奇怪的图案：○ △ □ ⬡ ★
+【东墙】带图案锁的铁门。`
+                },
+                onEnter: function() {
+                    narrate('你进入实验室。无影灯发出诡异的绿色光芒。');
+                    updateStats({ heartRate: -10, sanity: -10 });
+                },
+                getOptions: function() {
+                    const options = [
+                        { text: '[检查] 检查手术台', action: 'examine_table' },
+                        { text: '[检查] 检查墙面抓痕', action: 'examine_scratches' }
+                    ];
+
+                    if (!GameState.inventory.includes('salt')) {
+                        options.push({ text: '[打开] 打开标本柜', action: 'open_cabinet' });
+                    }
+
+                    if (!GameState.flags.log_read) {
+                        options.push({ text: '[阅读] 阅读实验记录', action: 'read_log' });
+                    }
+
+                    if (GameState.flags.pattern_known) {
+                        options.push({ text: '[解谜] 解开图案锁', action: 'solve_pattern' });
+                    }
+
+                    return options;
+                },
+                handleAction: function(action) {
+                    switch(action) {
+                        case 'examine_table':
+                            narrate('手术台上的约束带从内部挣脱...金属扣环深深凹陷。');
+                            updateStats({ sanity: -5 });
+                            break;
+
+                        case 'examine_scratches':
+                            if (GameState.inventory.includes('flashlight')) {
+                                narrate('在手电筒照射下，你看清了图案序列：');
+                                setTimeout(() => {
+                                    narrate('○（圆形）→ △（三角）→ □（方形）→ ⬡（六边形）→ ★（星形）');
+                                    narrate('每个图案下方有数字：1、2、3、4、5');
+                                    GameState.flags.pattern_known = true;
+                                }, 1000);
+                            } else {
+                                narrate('太暗了，看不清楚。需要光源。');
+                            }
+                            break;
+
+                        case 'open_cabinet':
+                            narrate('你打开破碎的柜子——');
+                            playSound('glassCreak');
+                            setTimeout(() => {
+                                narrate('柜子里有一小袋盐。');
+                                GameState.inventory.push('salt');
+                                narrate('【获得物品：盐】');
+                            }, 1000);
+                            break;
+
+                        case 'read_log':
+                            narrate('【实验记录 - 第28批次】');
+                            narrate('标本编号：28-47');
+                            narrate('程序：○注射 → △刺激 → □重组 → ⬡抹除 → ★激活');
+                            narrate('结果：失败。标本逃逸。它仍在设施内。');
+                            GameState.flags.log_read = true;
+                            GameState.flags.pattern_known = true;
+                            updateStats({ sanity: -15 });
+                            break;
+
+                        case 'solve_pattern':
+                            narrate('你按照顺序按下图案按钮...');
+                            setTimeout(() => {
+                                narrate('○ ... △ ... □ ... ⬡ ... ★');
+                                setTimeout(() => {
+                                    narrate('咔哒——机械锁打开！');
+                                    playSound('success');
+                                    setTimeout(() => {
+                                        changeScene('finale');
+                                    }, 1500);
+                                }, 2000);
+                            }, 1000);
+                            break;
+                    }
+                }
+            },
+
+            finale: {
+                id: 'finale',
+                name: '终局抉择室',
+                type: 'finale',
+                visual: {
+                    background: 'finale_room',
+                    darkness: 0.6,
+                    fog: 0.2,
+                    decay: 0.5
+                },
+                description: {
+                    initial: `你进入最后的房间——紧急避难室。
+
+【中央】三个控制面板：
+  [绿色] 紧急逃生 - 立即逃脱
+  [黄色] 部分封锁 - 困住实体
+  [红色] 完全销毁 - 60秒逃离
+
+【门外】猛烈的撞击声——砰！砰！砰！
+它在试图破门而入！`
+                },
+                onEnter: function() {
+                    narrate('你进入避难室。身后的门自动锁上。');
+                    narrate('门外传来撞击声...它来了！');
+                    updateStats({ heartRate: 30 });
+                    startDoorThreat();
+                },
+                getOptions: function() {
+                    return [
+                        { text: '[绿色按钮] 紧急逃生（立即逃脱）', action: 'green_button' },
+                        { text: '[黄色按钮] 部分封锁（困住实体）', action: 'yellow_button' },
+                        { text: '[红色按钮] 完全销毁（彻底摧毁）', action: 'red_button', risk: 'high' }
+                    ];
+                },
+                handleAction: function(action) {
+                    switch(action) {
+                        case 'green_button':
+                            triggerEnding('cursed');
+                            break;
+                        case 'yellow_button':
+                            triggerEnding('neutral');
+                            break;
+                        case 'red_button':
+                            if (GameState.player.hp >= 50) {
+                                triggerEnding('true');
+                            } else {
+                                narrate('你太虚弱了...无法在60秒内逃离...');
+                                triggerGameOver('bad');
+                            }
+                            break;
+                    }
+                }
+            }
+        };
+
+        // ===== 核心函数 =====
+        function startGame() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('status-hud').classList.remove('hidden');
+            document.getElementById('scene-description').classList.remove('hidden');
+            document.getElementById('narrative').classList.remove('hidden');
+            document.getElementById('options-panel').classList.remove('hidden');
+
+            changeScene('awakening_room');
+            setInterval(update, 1000 / 60);
+            setInterval(updateHeartRate, 1000);
+        }
+
+        function changeScene(sceneId) {
+            GameState.currentScene = sceneId;
+            if (!GameState.visitedScenes.includes(sceneId)) {
+                GameState.visitedScenes.push(sceneId);
+            }
+            GameState.sceneTime = 0;
+
+            const scene = Scenes[sceneId];
+            document.getElementById('scene-name').textContent = scene.name;
+            document.getElementById('scene-text').textContent = scene.description.initial;
+
+            if (scene.onEnter) scene.onEnter();
+            updateOptions();
+        }
+
+        function updateOptions() {
+            const scene = Scenes[GameState.currentScene];
+            const options = scene.getOptions();
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                if (opt.risk === 'high') btn.classList.add('high-risk');
+                btn.textContent = opt.text;
+                btn.onclick = () => handleAction(opt.action);
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleAction(action) {
+            const scene = Scenes[GameState.currentScene];
+            scene.handleAction(action);
+            updateOptions();
+        }
+
+        function narrate(text) {
+            const narrative = document.getElementById('narrative');
+            const p = document.createElement('p');
+            p.className = 'narrative-text';
+            p.textContent = text;
+            narrative.appendChild(p);
+            narrative.scrollTop = narrative.scrollHeight;
+
+            while (narrative.children.length > 30) {
+                narrative.removeChild(narrative.firstChild);
+            }
+        }
+
+        function updateStats(changes) {
+            if (changes.hp !== undefined) {
+                GameState.player.hp = Math.max(0, Math.min(100, GameState.player.hp + changes.hp));
+                if (GameState.player.hp <= 0) {
+                    triggerGameOver('bad');
+                }
+            }
+            if (changes.heartRate !== undefined) {
+                GameState.player.heartRate = Math.max(60, Math.min(180, GameState.player.heartRate + changes.heartRate));
+            }
+            if (changes.sanity !== undefined) {
+                GameState.player.sanity = Math.max(0, Math.min(100, GameState.player.sanity + changes.sanity));
+            }
+            if (changes.noise !== undefined) {
+                GameState.player.noise = Math.max(0, Math.min(100, GameState.player.noise + changes.noise));
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('hp-value').textContent = Math.floor(GameState.player.hp);
+            document.getElementById('hp-bar').style.width = GameState.player.hp + '%';
+            document.getElementById('heartrate-value').textContent = Math.floor(GameState.player.heartRate) + ' BPM';
+            document.getElementById('sanity-value').textContent = Math.floor(GameState.player.sanity);
+            document.getElementById('sanity-bar').style.width = GameState.player.sanity + '%';
+        }
+
+        function update() {
+            renderScene();
+            GameState.gameTime += 1/60;
+            GameState.sceneTime += 1/60;
+        }
+
+        function updateHeartRate() {
+            if (GameState.player.heartRate > 75) {
+                GameState.player.heartRate = Math.max(75, GameState.player.heartRate - 2);
+            }
+            updateUI();
+        }
+
+        function renderScene() {
+            const scene = Scenes[GameState.currentScene];
+            if (!scene) return;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 全局黑暗
+            ctx.fillStyle = `rgba(0, 0, 0, ${scene.visual.darkness})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 雾气
+            const fog = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, canvas.width * 0.7
+            );
+            fog.addColorStop(0, `rgba(60, 60, 65, ${scene.visual.fog * 0.2})`);
+            fog.addColorStop(1, 'rgba(40, 40, 45, 0)');
+            ctx.fillStyle = fog;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 晕影
+            const vignette = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, canvas.width * 0.3,
+                canvas.width/2, canvas.height/2, canvas.width * 0.7
+            );
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 手电筒
+            if (GameState.inventory.includes('flashlight')) {
+                const flashlight = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 150);
+                flashlight.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+                flashlight.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.globalCompositeOperation = 'lighten';
+                ctx.fillStyle = flashlight;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalCompositeOperation = 'source-over';
+            }
+        }
+
+        // ===== 特殊事件 =====
+        function triggerEntityEncounter() {
+            narrate('【警告】走廊尽头，黑暗中有一个高大的轮廓。');
+            narrate('它一动不动...但你感觉到它在看着你。');
+            GameState.flags.entity_visible = true;
+            updateStats({ heartRate: 40, sanity: -20 });
+            playSound('entityBreath');
+            updateOptions();
+
+            setTimeout(() => {
+                if (!GameState.flags.escaped_corridor) {
+                    narrate('【它开始移动】关节发出咔咔声——它在爬行！');
+                    GameState.flags.entity_hunting = true;
+                    triggerJumpscare('medium');
+                    updateOptions();
+                }
+            }, 5000);
+        }
+
+        function startDoorThreat() {
+            let threatLevel = 0;
+            const interval = setInterval(() => {
+                threatLevel++;
+                switch(threatLevel) {
+                    case 1:
+                        narrate('【砰！】门剧烈震动！');
+                        updateStats({ heartRate: 20 });
+                        break;
+                    case 2:
+                        narrate('门板开始变形——你看到凹痕！');
+                        updateStats({ heartRate: 30 });
+                        break;
+                    case 3:
+                        narrate('裂纹出现——它快要进来了！');
+                        triggerJumpscare('light');
+                        break;
+                    case 4:
+                        narrate('【它的手指从裂缝伸进来——细长、破碎、颤抖】');
+                        triggerJumpscare('medium');
+                        updateStats({ hp: -15 });
+                        break;
+                    case 5:
+                        clearInterval(interval);
+                        narrate('【时间到】门破碎——');
+                        triggerGameOver('bad');
+                        break;
+                }
+            }, 5000);
+        }
+
+        function triggerJumpscare(level) {
+            const overlay = document.getElementById('jumpscare-overlay');
+            overlay.classList.add('active');
+
+            let damage = 0, heartIncrease = 0, sanityLoss = 0;
+
+            switch(level) {
+                case 'light':
+                    damage = 5;
+                    heartIncrease = 15;
+                    sanityLoss = 5;
+                    overlay.style.background = 'rgba(255, 0, 0, 0.3)';
+                    break;
+                case 'medium':
+                    damage = 15;
+                    heartIncrease = 35;
+                    sanityLoss = 20;
+                    overlay.style.background = 'rgba(255, 0, 0, 0.6)';
+                    playSound('jumpscare');
+                    break;
+                case 'heavy':
+                    damage = 35;
+                    heartIncrease = 60;
+                    sanityLoss = 40;
+                    overlay.style.background = 'rgba(255, 0, 0, 0.9)';
+                    playSound('jumpscare');
+                    shakeScreen();
+                    break;
+            }
+
+            updateStats({ hp: -damage, heartRate: heartIncrease, sanity: -sanityLoss });
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, level === 'heavy' ? 1000 : level === 'medium' ? 600 : 300);
+        }
+
+        function shakeScreen() {
+            let count = 0;
+            const interval = setInterval(() => {
+                canvas.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+                count++;
+                if (count > 10) {
+                    clearInterval(interval);
+                    canvas.style.transform = 'translate(0, 0)';
+                }
+            }, 50);
+        }
+
+        // ===== 结局系统 =====
+        function triggerEnding(type) {
+            const endings = {
+                true: {
+                    title: '真·逃脱',
+                    text: `你按下红色按钮——完全销毁。
+
+【警告：设施自毁程序启动】
+【倒计时：60秒】
+
+你转身狂奔！爆炸声在身后响起！
+你冲出设施——寒冷的夜风扑面而来。
+
+身后——【轰！！！】巨大的火球冲天而起。
+
+你活下来了。
+它...已经被永远埋葬了。
+
+╔════════════════════════════╗
+║      【真·逃脱】           ║
+║   你成功摧毁了实体和设施    ║
+╚════════════════════════════╝`
+                },
+                cursed: {
+                    title: '诅咒·逃脱',
+                    text: `你按下绿色按钮——紧急逃生。
+
+门打开了，你冲了出去。
+你活下来了。
+
+但在你身后，设施的门仍然敞开着...
+黑暗中，有什么正在爬出来...
+红色的光在黑暗中闪烁。
+
+【嘎啦啦——】
+
+它...自由了。
+
+╔═══════════════════════════════╗
+║       【诅咒·逃脱】           ║
+║  你活了下来，但世界将付出代价  ║
+╚═══════════════════════════════╝`
+                },
+                neutral: {
+                    title: '部分封锁',
+                    text: `你按下黄色按钮——部分封锁。
+
+【设施进入半锁定状态】
+【10小时后自动解除】
+
+你逃脱了。
+它被困在里面...暂时的。
+
+你只是争取了时间...
+
+╔═══════════════════════════════╗
+║       【部分逃脱】            ║
+║    你逃脱了，但危机未解除     ║
+╚═══════════════════════════════╝`
+                }
+            };
+
+            narrate(endings[type].text);
+            setTimeout(() => {
+                if (confirm(`${endings[type].title}\n\n是否重新开始？`)) {
+                    location.reload();
+                }
+            }, 3000);
+        }
+
+        function triggerGameOver(reason) {
+            narrate(`
+你倒在地上...太虚弱了...
+
+黑暗中，爬行声越来越近...
+咔...咔...咔...
+
+它站在你面前。
+红色的光芒在眼眶中燃烧。
+
+【嘎啦啦——】
+
+画面变黑。
+
+╔═══════════════════════════════╗
+║        【Bad Ending】         ║
+║     你成为了第29号标本        ║
+╚═══════════════════════════════╝
+            `);
+
+            setTimeout(() => {
+                if (confirm('游戏结束。是否重新开始？')) {
+                    location.reload();
+                }
+            }, 3000);
+        }
+
+        // ===== 音效系统（简化） =====
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            switch(type) {
+                case 'jumpscare':
+                    oscillator.frequency.value = 100;
+                    gainNode.gain.value = 0.3;
+                    break;
+                case 'success':
+                    oscillator.frequency.value = 600;
+                    gainNode.gain.value = 0.1;
+                    break;
+                case 'fail':
+                    oscillator.frequency.value = 80;
+                    gainNode.gain.value = 0.2;
+                    break;
+                case 'ambientDrone':
+                    oscillator.frequency.value = 40;
+                    gainNode.gain.value = 0.15;
+                    break;
+                default:
+                    oscillator.frequency.value = 440;
+                    gainNode.gain.value = 0.1;
+            }
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // 初始化
+        updateUI();
+    </script>
+</body>
 </html>
