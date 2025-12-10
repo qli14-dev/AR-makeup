@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EscapeRoom.css';
 
 interface Item {
@@ -151,8 +151,33 @@ const EscapeRoom: React.FC = () => {
   };
 
   const handleObjectClick = (obj: GameObject) => {
+    // If an item is selected, try to use it on this object
+    if (selectedItem) {
+      const objToUse = objects.find(o => o.id === obj.id);
+      if (objToUse?.requiresItem === selectedItem) {
+        // Item can be used on this object
+        const updatedObjects = objects.map(o =>
+          o.id === obj.id ? { ...o, examined: true } : o
+        );
+        setObjects(updatedObjects);
+        setExamineText(obj.clue || `你仔细检查了${obj.name}。`);
+
+        if (obj.givesItem && !inventory.find(item => item.id === obj.givesItem!.id)) {
+          setInventory([...inventory, obj.givesItem]);
+          showMessage(`获得物品: ${obj.givesItem.name}`);
+        }
+        setSelectedItem(null);
+      } else {
+        showMessage('这个物品无法在这里使用');
+        setSelectedItem(null);
+      }
+      return;
+    }
+
+    // Normal object interaction
     if (obj.requiresItem && !inventory.find(item => item.id === obj.requiresItem)) {
-      showMessage(`你需要${inventory.find(i => i.id === obj.requiresItem)?.name || '某个物品'}才能检查这个物品`);
+      const requiredItem = inventory.find(i => i.id === obj.requiresItem);
+      showMessage(`你需要${requiredItem?.name || '某个物品'}才能检查这个物品。尝试选中物品后再点击。`);
       return;
     }
 
@@ -171,16 +196,6 @@ const EscapeRoom: React.FC = () => {
     if (obj.givesItem && !inventory.find(item => item.id === obj.givesItem!.id)) {
       setInventory([...inventory, obj.givesItem]);
       showMessage(`获得物品: ${obj.givesItem.name}`);
-    }
-  };
-
-  const useItem = (itemId: string, objectId: string) => {
-    const obj = objects.find(o => o.id === objectId);
-    if (obj?.requiresItem === itemId) {
-      handleObjectClick(obj);
-      setSelectedItem(null);
-    } else {
-      showMessage('这个物品无法在这里使用');
     }
   };
 
